@@ -114,6 +114,7 @@
 #define        REG_HOP_PERIOD	  				0x24
 #define        REG_PREAMBLE_MSB_FSK 			0x25
 #define        REG_FIFO_RX_BYTE_ADDR 			0x25
+#define        REG_MODEM_CONFIG3                0x26  // added for sx1276
 #define        REG_PREAMBLE_LSB_FSK 			0x26
 #define        REG_SYNC_CONFIG	  				0x27
 #define        REG_SYNC_VALUE1	 				0x28
@@ -181,9 +182,18 @@ const uint32_t CH_11_900 = 0xE7B5C2; // channel 11, central freq = 926.84MHz
 const uint32_t CH_12_900 = 0xE4C000; // default channel 915MHz, the module is configured with it
 
 //LORA BANDWIDTH:
-const uint8_t BW_125 = 0x00;
-const uint8_t BW_250 = 0x01;
-const uint8_t BW_500 = 0x02;
+// Modified By Ahmed Awad as new BW are available in the SX1276
+	
+const uint16_t BW_7_8 = 0x0000;
+const uint16_t BW_10_4 = 0x0001;
+const uint16_t BW_15_6 = 0x0010;
+const uint16_t BW_20_8 = 0x0011;
+const uint16_t BW_31_25 = 0x0100;
+const uint16_t BW_41_7 = 0x0101;
+const uint16_t BW_62_5 = 0x0110;
+const uint16_t BW_125 = 0x0111;
+const uint16_t BW_250 = 0x1000;
+const uint16_t BW_500 = 0x1001;
 const double SignalBwLog[] =
 {
     5.0969100130080564143587833158265,
@@ -314,7 +324,7 @@ public:
 		_packetNumber = 0;
 		_reception = CORRECT_PACKET;
 		_retries = 0;
-		_maxRetries = 0;
+		_maxRetries = 3;
 		packet_sent.retry = _retries;
 	};
 
@@ -1060,7 +1070,7 @@ public:
 	//!    bandwidth = 10  --> BW = 500KHz
   	/*!
    	*/
-	uint8_t _bandwidth;
+	uint16_t _bandwidth;
 
 	//! Variable : coding rate configured in LoRa mode.
 	//!    codingRate = 001  --> CR = 4/5
