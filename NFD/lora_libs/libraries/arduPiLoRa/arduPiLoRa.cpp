@@ -82,75 +82,57 @@ uint8_t SX1272::ON()
 
   // set LoRa mode
   state = setLORA();
-
+// Registers modified by Ahmed Awad 
+	
+	
+// These registers will be modified when using the other functions setmode , setpowerON ... This is only initialization
 	//Set initialization values
 	writeRegister(0x0,0x0);
-	writeRegister(0x1,0x81);
-	writeRegister(0x2,0x1A);
-	writeRegister(0x3,0xB);
-	writeRegister(0x4,0x0);
-	writeRegister(0x5,0x52);
-	writeRegister(0x6,0xD8);
-	writeRegister(0x7,0x99);
-	writeRegister(0x8,0x99);
-	writeRegister(0x9,0x0);
-	writeRegister(0xA,0x9);
-	writeRegister(0xB,0x3B);
-	writeRegister(0xC,0x23);
-	writeRegister(0xD,0x1);
-	writeRegister(0xE,0x80);
-	writeRegister(0xF,0x0);
-	writeRegister(0x10,0x0);
-	writeRegister(0x11,0x0);
-	writeRegister(0x12,0x0);
-	writeRegister(0x13,0x0);
-	writeRegister(0x14,0x0);
-	writeRegister(0x15,0x0);
-	writeRegister(0x16,0x0);
-	writeRegister(0x17,0x0);
-	writeRegister(0x18,0x10);
-	writeRegister(0x19,0x0);
-	writeRegister(0x1A,0x0);
-	writeRegister(0x1B,0x0);
-	writeRegister(0x1C,0x0);
-	writeRegister(0x1D,0x4A);
-	writeRegister(0x1E,0x97);
-	writeRegister(0x1F,0xFF);
-	writeRegister(0x20,0x0);
-	writeRegister(0x21,0x8);
-	writeRegister(0x22,0xFF);
-	writeRegister(0x23,0xFF);
-	writeRegister(0x24,0x0);
-	writeRegister(0x25,0x0);
-	writeRegister(0x26,0x0);
-	writeRegister(0x27,0x0);
-	writeRegister(0x28,0x0);
-	writeRegister(0x29,0x0);
-	writeRegister(0x2A,0x0);
-	writeRegister(0x2B,0x0);
-	writeRegister(0x2C,0x0);
-	writeRegister(0x2D,0x50);
-	writeRegister(0x2E,0x14);
-	writeRegister(0x2F,0x40);
-	writeRegister(0x30,0x0);
-	writeRegister(0x31,0x3);
-	writeRegister(0x32,0x5);
-	writeRegister(0x33,0x27);
-	writeRegister(0x34,0x1C);
-	writeRegister(0x35,0xA);
-	writeRegister(0x36,0x0);
-	writeRegister(0x37,0xA);
-	writeRegister(0x38,0x42);
-	writeRegister(0x39,0x12);
-	writeRegister(0x3A,0x65);
-	writeRegister(0x3B,0x1D);
-	writeRegister(0x3C,0x1);
-	writeRegister(0x3D,0xA1);
-	writeRegister(0x3E,0x0);
-	writeRegister(0x3F,0x0);
+	// Common register Settings 
+	writeRegister(0x1,0x81);  // RegOpMode LoRa mode + StdBy mode 
+	writeRegister(0x2,0x1A);  // reserved
+	writeRegister(0x3,0xB );   // reserved
+	writeRegister(0x4,0x0 );   // reserved
+	writeRegister(0x5,0x52);  // reserved
+	writeRegister(0x6,0xD8);  // RegFrMsb  CH = 14_868, 866.40MHz
+	writeRegister(0x7,0x99);  // RegFrMsb  CH = 14_868, 866.40MHz
+	writeRegister(0x8,0x99);  // RegFrLsb  CH = 14_868, 866.40MHz this will be changed when using the function sx1272.setChannel(CH_10_868) in the main code
+	// Registers for Rf Blocks 
+	writeRegister(0x9,0x0);   // RegPaConfig this will be changed when using the function sx1272.setPower('H') in the main code
+	writeRegister(0xA,0x09);  // RegPaRamp 
+	writeRegister(0xB,0x1B);  // RegOcp        in any case the function setMaxCurrent(0x1B) wrote the vlaue of the register 
+	writeRegister(0xC,0x23);  // RegLna  LNA Max gain + Highfreq BoostOn 150% LNA current 
+	// LoRa Page Registers 
+	writeRegister(0xD,0x1);   // RegFifoAddrPtr
+	writeRegister(0xE,0x80);  // RegFifoTxBaseAddr
+	writeRegister(0xF,0x0);   // RegFifoRxBaseAddr
+	writeRegister(0x10,0x0);  // RegFifoRxCurrentAddr
+	writeRegister(0x11,0x0);  // RegIrqFlagMask 
+	writeRegister(0x12,0x0);  // RegIrqFlags
+	writeRegister(0x13,0x0);  // RegRxNbBytes
+	writeRegister(0x14,0x0);  // RegRXHeaderCntValueMsb n/a
+	writeRegister(0x15,0x0);  // n/a
+	writeRegister(0x16,0x0);  // n/a
+	writeRegister(0x17,0x0);  // n/a
+	writeRegister(0x18,0x10); // RegModemStat
+	writeRegister(0x19,0x0);  // n/a
+	writeRegister(0x1A,0x0);  // n/a 
+	writeRegister(0x1B,0x0);  // n/a
+	writeRegister(0x1C,0x0);  // n/a
+	writeRegister(0x1D,0x82); // RegModemConfig1 (SignalBW + ErrorCodingRate + Explicit/Implicit Header mode)
+	writeRegister(0x1E,0x97); // RegModemConfig2 (SpreadingFactor + Normal/Continous mode + CrC on/off ) 
+	writeRegister(0x1F,0xFF); // SX1272 = SX1276 
+	writeRegister(0x20,0x0);  // SX1272 = SX1276  
+	writeRegister(0x21,0x8);  // SX1272 = SX1276  
+	writeRegister(0x22,0xFF); // SX1272 = SX1276 
+	writeRegister(0x23,0xFF); // SX1272 = SX1276 
+	writeRegister(0x24,0x0);  // SX1272 = SX1276 
+	writeRegister(0x25,0x0);  // SX1272 = SX1276 
+	writeRegister(0x26,0x04); // RegModemConfig3 (AgcAutoOn = 1 + LowDataRateOptimize = 0)
+	// Reserved registers 0x27 -- 0x3F
 	writeRegister(0x40,0x0);
 	writeRegister(0x41,0x0);
-	writeRegister(0x42,0x22);
+	writeRegister(0x42,0x12); // Sillicon Version for SX1276 
 	
   return state;
 }
@@ -561,11 +543,12 @@ int8_t SX1272::setMode(uint8_t mode)
 		config1 = readRegister(REG_MODEM_CONFIG1);
         switch (mode)
         {   //      Different way to check for each mode:
-            // (config1 >> 3) ---> take out bits 7-3 from REG_MODEM_CONFIG1 (=_bandwidth & _codingRate together)
+					//  Modified By Ahmed Awad 
+            // (config1 >> 1) ---> take out bits 7-1 from REG_MODEM_CONFIG1 (=_bandwidth & _codingRate together)
             // (config2 >> 4) ---> take out bits 7-4 from REG_MODEM_CONFIG2 (=_spreadingFactor)
  
             // mode 1: BW = 125 KHz, CR = 4/5, SF = 12.
-            case 1:  if( (config1 >> 3) == 0x01 )
+            case 1:  if( (config1 >> 1) == 0x39 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_12 )
                             {
@@ -576,7 +559,7 @@ int8_t SX1272::setMode(uint8_t mode)
  
  
             // mode 2: BW = 250 KHz, CR = 4/5, SF = 12.
-            case 2:  if( (config1 >> 3) == 0x09 )
+            case 2:  if( (config1 >> 1) == 0x41 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_12 )
                             {
@@ -586,7 +569,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 3: BW = 125 KHz, CR = 4/5, SF = 10.
-            case 3:  if( (config1 >> 3) == 0x01 )
+            case 3:  if( (config1 >> 1) == 0x39 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_10 )
                             {
@@ -596,7 +579,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 4: BW = 500 KHz, CR = 4/5, SF = 12.
-            case 4:  if( (config1 >> 3) == 0x11 )
+            case 4:  if( (config1 >> 1) == 0x49 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_12 )
                             {
@@ -606,7 +589,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 5: BW = 250 KHz, CR = 4/5, SF = 10.
-            case 5:  if( (config1 >> 3) == 0x09 )
+            case 5:  if( (config1 >> 1) == 0x41 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_10 )
                             {
@@ -616,7 +599,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 6: BW = 500 KHz, CR = 4/5, SF = 11.
-            case 6:  if( (config1 >> 3) == 0x11 )
+            case 6:  if( (config1 >> 1) == 0x49 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_11 )
                             {
@@ -626,7 +609,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 7: BW = 250 KHz, CR = 4/5, SF = 9.
-            case 7:  if( (config1 >> 3) == 0x09 )
+            case 7:  if( (config1 >> 1) == 0x41 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_9 )
                             {
@@ -636,7 +619,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 8: BW = 500 KHz, CR = 4/5, SF = 9.
-            case 8:  if ((config1 >> 3) == 0x11)
+            case 8:  if ((config1 >> 1) == 0x49)
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_9 )
                             {
@@ -646,7 +629,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 9: BW = 500 KHz, CR = 4/5, SF = 8.
-            case 9:  if( (config1 >> 3) == 0x11 )
+            case 9:  if( (config1 >> 1) == 0x49 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_8 )
                             {
@@ -656,7 +639,7 @@ int8_t SX1272::setMode(uint8_t mode)
                      break;
  
             // mode 10: BW = 500 KHz, CR = 4/5, SF = 7.
-            case 10: if( (config1 >> 3) == 0x11 )
+            case 10: if( (config1 >> 1) == 0x49 )
                         {  config2 = readRegister(REG_MODEM_CONFIG2);
                         if( (config2 >> 4) == SF_7 )
                             {
@@ -696,6 +679,7 @@ int8_t SX1272::setMode(uint8_t mode)
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
+	// Modified By Ahmed Awad
 uint8_t	SX1272::getHeader()
 {
 	int8_t state = 2;
@@ -706,7 +690,7 @@ uint8_t	SX1272::getHeader()
 	#endif
 
 	// take out bit 2 from REG_MODEM_CONFIG1 indicates ImplicitHeaderModeOn
-	if( bitRead(REG_MODEM_CONFIG1, 2) == 0 )
+	if( bitRead(REG_MODEM_CONFIG1, 0) == 0 )
 	{ // explicit header mode (ON)
 		_header = HEADER_ON;
 		state = 1;
@@ -752,6 +736,7 @@ uint8_t	SX1272::getHeader()
    state = 0  --> The command has been executed with no errors
    state = -1 --> Forbidden command for this protocol
 */
+	// Modified By Ahmed Awad
 int8_t	SX1272::setHeaderON()
 {
   int8_t state = 2;
@@ -782,20 +767,20 @@ int8_t	SX1272::setHeaderON()
 	}
 	else
 	{
-		config1 = config1 & 0B11111011;			// clears bit 2 from config1 = headerON
+		config1 = config1 & 0B11111110;			// clears bit 0 from config1 = headerON
 		writeRegister(REG_MODEM_CONFIG1,config1);	// Update config1
 	}
 	if( _spreadingFactor != 6 )
 	{ // checking headerON taking out bit 2 from REG_MODEM_CONFIG1
 		config1 = readRegister(REG_MODEM_CONFIG1);
-		if( bitRead(config1, 2) == HEADER_ON )
+		if( bitRead(config1, 0) == HEADER_ON )
 		{
 			state = 0;
 			_header = HEADER_ON;
-			#if (SX1272_debug_mode > 1)
+			//#if (SX1272_debug_mode > 1)
 				printf("## Header has been activated ##\n");
 				printf("\n");
-			#endif
+			//#endif
 		}
 		else
 		{
@@ -814,6 +799,7 @@ int8_t	SX1272::setHeaderON()
    state = 0  --> The command has been executed with no errors
    state = -1 --> Forbidden command for this protocol
 */
+	// Modified By Ahmed Awad
 int8_t	SX1272::setHeaderOFF()
 {
   uint8_t state = 2;
@@ -835,11 +821,11 @@ int8_t	SX1272::setHeaderOFF()
   else
   {
 	  config1 = readRegister(REG_MODEM_CONFIG1);	// Save config1 to modify only the header bit
-	  config1 = config1 | 0B00000100;				// sets bit 2 from REG_MODEM_CONFIG1 = headerOFF
+	  config1 = config1 | 0B00000001;				// sets bit 0 from REG_MODEM_CONFIG1 = headerOFF
 	  writeRegister(REG_MODEM_CONFIG1,config1);		// Update config1
 
 	  config1 = readRegister(REG_MODEM_CONFIG1);
-	  if( bitRead(config1, 2) == HEADER_OFF )
+	  if( bitRead(config1, 0) == HEADER_OFF )
 	  { // checking headerOFF taking out bit 2 from REG_MODEM_CONFIG1
 			state = 0;
 			_header = HEADER_OFF;
@@ -868,6 +854,7 @@ int8_t	SX1272::setHeaderOFF()
    state = 1  --> There has been an error while executing the command
    state = 0  --> The command has been executed with no errors
 */
+// modified by Ahmed Awad
 uint8_t	SX1272::getCRC()
 {
 	int8_t state = 2;
