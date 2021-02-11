@@ -39,6 +39,7 @@ LoRaFactory::doProcessConfig(OptionalConfigSection configSection,
                             FaceSystem::ConfigContext& context)
 {
     // Not implemented yet! Implement if time
+    // Alter settings in nfd.config file
 }
 
 void
