@@ -263,7 +263,8 @@ LoRaFactory::sendPacket()
       {
         std::string info = "Successfully sent packet to ";
         if (dst == BROADCAST_0) {
-          info += "everyone";
+          //info += "everyone";
+          info += "Everyone at " + std::to_string(dst); // double check to see that dst is set to broadcast_0 
         }
         else
         {
