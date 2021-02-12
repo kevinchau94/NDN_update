@@ -58,6 +58,9 @@ class NdnPoke : boost::noncopyable
 public:
   NdnPoke(Face& face, KeyChain& keyChain, std::istream& input, const PokeOptions& options);
 
+  // initialize packet sent counter to 0
+  times_packet_sent = 0;
+
   enum class Result {
     DATA_SENT = 0,
     UNKNOWN = 1,
