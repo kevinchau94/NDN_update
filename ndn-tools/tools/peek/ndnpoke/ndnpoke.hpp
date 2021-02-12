@@ -59,7 +59,7 @@ public:
   NdnPoke(Face& face, KeyChain& keyChain, std::istream& input, const PokeOptions& options);
 
   // initialize packet sent counter to 0
-  times_packet_sent = 0;
+  int times_packet_sent = 0;
 
   enum class Result {
     DATA_SENT = 0,
