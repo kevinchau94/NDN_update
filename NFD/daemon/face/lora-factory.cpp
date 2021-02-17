@@ -56,10 +56,15 @@ LoRaFactory::doCreateFace(const CreateFaceRequest& req,
         channels = m_channels;
         std::cerr << "Created unicast channel." << std::endl; 
       }
-      else {
+      else if (URI.find('M') != std::string::npos) {
         channels = mcast_channels;
         std::cerr << "Created multicast channel." << std::endl; 
       }
+      else {
+        channels = bcast_channels;
+        std::cerr << "Created broadcast channel." << std::endl;
+      }
+    
       for (const auto& i : channels) {
         // Found a channel already created
         if (i.first == req.remoteUri.toString()) {
