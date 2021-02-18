@@ -208,6 +208,9 @@ void *LoRaFactory::transmit_and_recieve()
 void
 LoRaFactory::sendPacket()
 {
+  // create log info indicating that sendpacket has been called
+  NFD_LOG_INFO("LoRaFactory sendPacket has been called");
+  
   try
   {
       // Grab queue item
@@ -264,7 +267,7 @@ LoRaFactory::sendPacket()
         std::string info = "Successfully sent packet to ";
         if (dst == BROADCAST_0) {
           //info += "everyone";
-          info += "Everyone at " + std::to_string(dst); // double check to see that dst is set to broadcast_0 
+          info += "Everyone at ID: " + std::to_string(dst); // double check to see that dst is set to broadcast_0 
         }
         else
         {
