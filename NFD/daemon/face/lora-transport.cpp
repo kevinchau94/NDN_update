@@ -16,6 +16,7 @@ LoRaTransport::LoRaTransport(std::pair<uint8_t, uint8_t> ids,
     // Set all of the static variables associated with this transmission (just need to set MTU)
     this->setMtu(160);
 
+    // unused code 
     // Read in a certain topology if flag is high (can add certain other LoRa IDs to send to and recv from)
     // if (readTopology) {
     //     std::ifstream infile(topologyFilename); 
