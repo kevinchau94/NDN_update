@@ -153,6 +153,8 @@ The LoRa module hardware is setup in NFD/daemon/face/lora-factory.cpp in the `se
 Modified/Added files:
 - ndn-cxx/ndn-cxx/net/face-uri.cpp
 - ndn-cxx/ndn-cxx/net/face-uri.hpp
+- ndn-tools/tools/peek/ndnpoke/ndnpoke.cpp
+- ndn-tools/tools/peek/ndnpoke/ndnpoke.hpp
 - NFD/daemon/face/lora-transport.cpp
 - NFD/daemon/face/lora-transport.hpp
 - NFD/daemon/face/lora-channel.cpp
