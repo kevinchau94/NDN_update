@@ -54,11 +54,11 @@ LoRaFactory::doCreateFace(const CreateFaceRequest& req,
       // unicast
       if (URI.find('-') != std::string::npos) {
         channels = m_channels;
-        std::cerr << "Created unicast channel." << std::endl; 
+        std::cerr << "Created unicast channel." << std::endl; // message added by K. Chau
       }
       else {
         channels = mcast_channels;
-        std::cerr << "Created multicast channel." << std::endl; 
+        std::cerr << "Created multicast channel." << std::endl; // message added by K. Chau
       }
       for (const auto& i : channels) {
         // Found a channel already created
@@ -128,6 +128,7 @@ LoRaFactory::doGetChannels() const
 void
 LoRaParameters::LoRaParameters(int CR, int BW, int SF, int channel1, int channel2)
   
+  // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
   std::string codingRate = "CR_" + std::to_string(CR);
   std::string bandwidth = "BW_" + std::to_string(BW);
@@ -140,6 +141,7 @@ LoRaFactory::setup(){
   // Power ON the module
   e = sx1272.ON();
   
+  // Operating parameters affected by LoRaParameters function
   //Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
   e = sx1272.setCR(codingRate);         // original CR value = CR_5
   e = sx1272.setBW(bandwidth);       // original BW value = BW_500
@@ -218,7 +220,7 @@ void
 LoRaFactory::sendPacket()
 {
   // create log info indicating that sendpacket has been called
-  NFD_LOG_INFO("LoRaFactory sendPacket has been called");
+  NFD_LOG_INFO("LoRaFactory sendPacket has been called"); // message added by K.Chau
   
   try
   {
@@ -276,7 +278,7 @@ LoRaFactory::sendPacket()
         std::string info = "Successfully sent packet to ";
         if (dst == BROADCAST_0) {
           //info += "everyone";
-          info += "Everyone at ID: " + std::to_string(dst); // double check to see that dst is set to broadcast_0 
+          info += "Everyone at ID: " + std::to_string(dst); // double check to see that dst is set to broadcast_0 altered by K.Chau
         }
         else
         {
