@@ -82,6 +82,7 @@ NdnPoke::sendData(const Data& data)
   m_result = Result::DATA_SENT;
 
   // increment # of times packet sent counter by 1 and output message 
+  // message implemented by K.Chau
   times_packet_sent+= 1; 
   std::cerr << "Times packet sent: " << times_packet_sent << std::endl;
   
