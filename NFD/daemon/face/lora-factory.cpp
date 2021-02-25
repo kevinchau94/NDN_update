@@ -127,6 +127,8 @@ LoRaFactory::doGetChannels() const
 
 void
 LoRaParameters::LoRaParameters(int CR, int BW, int SF, int channel1, int channel2)
+  
+  // set parameter values for CR, BW, SF, and frequency channel
   std::string codingRate = "CR_" + std::to_string(CR);
   std::string bandwidth = "BW_" + std::to_string(BW);
   std::string spreadingFactor = "SF_" + std::to_string(SF);
@@ -147,7 +149,7 @@ LoRaFactory::setup(){
   e = sx1272.setHeaderON();
 
   // Select frequency channel
-  e = sx1272.setChannel(CH_00_900);  // original CH value = CH_00_900
+  e = sx1272.setChannel(channel);  // original CH value = CH_00_900
 
   // Set CRC
   e = sx1272.setCRC_ON();
