@@ -5,11 +5,13 @@ This repository contains the project and work done to add a LoRa networking face
 ### Hardware and Libraries
 This code was modified for and tested on the following hardware and software:
 - Raspberry Pi 3B+
-- Libelium SX1272 LoRa Shield https://www.cooking-hacks.com/sx1272-lora-shield-for-raspberry-pi-900-mhz.html
+- Libelium SX1272 LoRa Shield (old) https://www.cooking-hacks.com/sx1272-lora-shield-for-raspberry-pi-900-mhz.html 
+- Modtronix inAir9B SX1276 LoRa module (new) https://modtronix.com/product/inair9b/ 
 
 The libraries used are as follows:
 - [ndn-cxx](https://github.com/named-data/ndn-cxx) - C++ Library that implements NDN programming functions. Used by NFD.
 - [ArduPi](https://www.cooking-hacks.com/documentation/tutorials/extreme-range-lora-sx1272-module-shield-arduino-raspberry-pi-intel-galileo/index.html#step4) SX1272 Library for Raspberry Pi
+- [SX1276](https://github.com/ahmedawad1/SX1276-LoRa-driver) Register changes to library for SX1276 LoRa module from SX1272 
 
 Software:
 - Raspbian 10 Buster
@@ -102,7 +104,7 @@ sudo ./waf install
 
 
 ### Running and testing the software
-Make sure the SX1272 module is connected to the Raspberry Pi. Make sure the Pi is off while connecting the module.
+Make sure the SX1272/SX1276 module is connected to the Raspberry Pi. Make sure the Pi is off while connecting the module.
 
 Test out NFD locally or with a face other than LoRa first.
 Creating a face and connecting to other NFD daemons can be found at [Getting Started with NFD](https://named-data.net/doc/NFD/current/INSTALL.html) & [NDN-tools testing](https://github.com/named-data/ndn-tools).
@@ -120,6 +122,8 @@ Ex. connect node 1 to node 2:
 nfdc face create lora://1-2
 ```
 Look for the face id
+Message should appear as face created id:<faceid>
+  
 ```
 nfdc route add /ndn <faceid>
 ```
@@ -128,6 +132,12 @@ The route added (/ndn) can be any route name
 Add another face if you want to make a connection to another node.
 
 Follow the same instructions for the next node with the appropriate ids.
+
+To make a broadcast face use the following command: (face id can be a number other than 1)
+
+```
+nfdc face create lora://1
+```
 
 #### Testing
 Using ndn-tools:
@@ -145,6 +155,13 @@ On the second Pi,
 ndnpeek -pf -l 10000
 ```
 The -l flag specifies the timeout period.
+
+producing a packet as such:
+```
+echo "test2" | ndnpoke -ux 1000 /ndn
+```
+-u indicates that packet can be sent unsolicited, or without receiving an interest packet. 
+
 
 ### Configuration
 The LoRa module hardware is setup in NFD/daemon/face/lora-factory.cpp in the `setup()` function.
@@ -177,6 +194,10 @@ Modified/Added files:
 - Garrick Clegg
 - Jason Stauffer
 - Thomas Van Hook
+- Kevin Chau
+- Camden Ewell
+- Ye Zhou
+- Jack Fahey
 
 Advisors, Mentors, Support, Thanks
 - Stephen Dudley
@@ -193,6 +214,7 @@ Resources:
 - https://github.com/named-data/NFD
 - https://github.com/named-data/ndn-cxx
 - https://github.com/named-data/ndn-tools
+- https://github.com/ahmedawad1/SX1276-LoRa-driver
 
 
 Big thanks goes to all contributers of the [Named Data Netwoking Project](https://named-data.net/)!
