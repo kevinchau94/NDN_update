@@ -126,7 +126,7 @@ LoRaFactory::doGetChannels() const
 }
 
 void
-LoRaParameters::LoRaParameters(int CR, int BW, int SF, int channel1, int channel2)
+LoRaFactory::LoRaParameters(int CR, int BW, int SF, int channel1, int channel2)
   
   // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
