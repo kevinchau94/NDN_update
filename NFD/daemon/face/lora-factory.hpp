@@ -57,10 +57,11 @@ public:
    */
   std::shared_ptr<LoRaChannel>
   createMultiCastChannel(std::string URI);
-
+ 
+ /*
   explicit
   LoRaParameters(int CR, int BW, int SF, int channel1, int channel2);
-  /**
+  **
         \edit LoRa module transmission parameters
         \added by K.Chau
   */
