@@ -143,15 +143,20 @@ LoRaFactory::setup(){
   
   // Operating parameters affected by LoRaParameters function
   //Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-  e = sx1272.setCR(codingRate);         // original CR value = CR_5
-  e = sx1272.setBW(bandwidth);       // original BW value = BW_500
-  e = sx1272.setSF(spreadingFactor);         // original SF value = SF_7
+  //e = sx1272.setCR(codingRate);         // original CR value = CR_5
+  //e = sx1272.setBW(bandwidth);       // original BW value = BW_500
+  //e = sx1272.setSF(spreadingFactor);         // original SF value = SF_7
+  e = sx1272.setCR(CR_5);
+  e = sx1272.setBW(BW_500);
+  e = sx1272.setSF(SF_7); 
 
   // Set header
   e = sx1272.setHeaderON();
 
   // Select frequency channel
-  e = sx1272.setChannel(channel);  // original CH value = CH_00_900
+  //e = sx1272.setChannel(channel);  // original CH value = CH_00_900
+  e = sx1272.setChannel(CH_00_900);
+
 
   // Set CRC
   e = sx1272.setCRC_ON();
@@ -168,8 +173,16 @@ LoRaFactory::setup(){
     NFD_LOG_INFO("Unable to enter receive mode");
 
   // Print a success message
-  NFD_LOG_INFO("SX1272 successfully configured");
-  delay(1000);
+  // Modified by C.EWELL
+  e = sx1272.getchip();
+  if (e == SX1272Chip){
+    NFD_LOG_INFO("SX1272 successfully configured");
+    delay(1000);
+  }
+  else {
+    NFD_LOG_INFO("SX1276 successfully configured");
+    delay(1000);
+  }
 }
 
 /*

@@ -70,7 +70,7 @@ void LoRaTransport::doSend(const ndn::Block &packet, const EndpointId& endpoint)
       std::pair<std::pair<uint8_t, uint8_t>*, ndn::encoding::EncodingBuffer *>* pairToPush = new std::pair<std::pair<uint8_t, uint8_t>*, ndn::encoding::EncodingBuffer *>(ids, toSendBuff);
       sendBufferQueue->push(pairToPush);
       pthread_mutex_unlock(threadLock);
-      NFD_LOG_FACE_INFO("Sending data");
+      NFD_LOG_FACE_INFO("Sending data/n");
   }
   catch(const std::exception& e)
   {
