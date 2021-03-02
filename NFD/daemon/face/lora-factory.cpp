@@ -3,6 +3,8 @@
 #include "lora-factory.hpp"
 #include "generic-link-service.hpp"
 #include "common/global.hpp"
+#include <iostream>
+
 
 namespace nfd {
 namespace face {
