@@ -54,11 +54,11 @@ LoRaFactory::doCreateFace(const CreateFaceRequest& req,
       // unicast
       if (URI.find('-') != std::string::npos) {
         channels = m_channels;
-        std::cerr << "Created unicast channel." << std::endl; // message added by K. Chau
+        std::cout << "Created unicast channel." << std::endl; // message added by K. Chau
       }
       else {
         channels = mcast_channels;
-        std::cerr << "Created multicast channel." << std::endl; // message added by K. Chau
+        std::cout << "Created multicast channel." << std::endl; // message added by K. Chau
       }
       for (const auto& i : channels) {
         // Found a channel already created
