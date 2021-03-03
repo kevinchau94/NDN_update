@@ -60,7 +60,7 @@ public:
  
  
   void
-  LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& channel2);
+  LoRaParameters(uint8_t& CR, uint16_t& BW, uint8_t& SF, uint32_t& CH);
   /**
         \edit LoRa module transmission parameters
         \added by K.Chau
