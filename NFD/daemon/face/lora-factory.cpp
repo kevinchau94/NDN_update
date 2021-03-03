@@ -127,9 +127,9 @@ LoRaFactory::doGetChannels() const
   return getChannelsFromMap(m_channels);
 }
 
-  /*
+  
 void
-LoRaFactory::LoRaParameters(int CR, int BW, int SF, int channel1, int channel2)
+LoRaFactory::LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& channel2){
   
   // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
@@ -137,7 +137,7 @@ LoRaFactory::LoRaParameters(int CR, int BW, int SF, int channel1, int channel2)
   std::string bandwidth = "BW_" + std::to_string(BW);
   std::string spreadingFactor = "SF_" + std::to_string(SF);
   std::string channel = "CH_" + std::to_string(channel1) + "_" + std::to_string(channel2);
-  */
+}
   
 void
 LoRaFactory::setup(){
