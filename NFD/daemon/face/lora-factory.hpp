@@ -60,6 +60,7 @@ public:
  
  
   explicit
+  void
   LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& channel2);
   /**
         \edit LoRa module transmission parameters
