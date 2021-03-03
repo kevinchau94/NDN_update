@@ -129,14 +129,14 @@ LoRaFactory::doGetChannels() const
 
   
 void
-LoRaFactory::LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& channel2){
+LoRaFactory::LoRaParameters(uint8_t& CR, uint8_t& BW, uint8_t& SF, uint8_t& CH){
   
   // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
-  codingRate = const_cast <uint8_t*> (reinterpret_cast <uint8_t*>("CR_")) + std::to_string(CR);
-  bandwidth = reinterpret_cast <uint8_t*> ("BW_") + BW;
-  spreadingFactor = static_cast<uint8_t>("SF_") + SF;
-  channel = "CH_" + schannel1 + "_" + channel2;
+  codingRate = CR;
+  bandwidth = BW;
+  spreadingFactor = SF;
+  channel = CH;
   
   if (CR != 0){
   setParam = 1;  
