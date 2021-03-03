@@ -134,8 +134,8 @@ LoRaFactory::LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& chann
   // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
   codingRate = reinterpret_cast <uint8_t*>("CR_") + std::to_string(CR);
-  bandwidth = BW_ + BW;
-  spreadingFactor = static_cast<uinit8_t>("SF_") + SF;
+  bandwidth = reinterpret_cast <uint8_t> ("BW_") + BW;
+  spreadingFactor = static_cast<uint8_t>("SF_") + SF;
   channel = "CH_" + schannel1 + "_" + channel2;
   
   if (CR != 0){
