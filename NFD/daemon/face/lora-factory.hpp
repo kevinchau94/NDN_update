@@ -117,6 +117,10 @@ private:
   
   // used for loraparamter function
   int setParam;
+  std::string codingRate;
+  std::string bandwidth;
+  std::string spreadingFactor;
+  std::string channel;
 
   // Creating mutexes for shared queue and conditions for when data is produced from console
   pthread_mutex_t threadLock = PTHREAD_MUTEX_INITIALIZER; 
