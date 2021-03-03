@@ -129,7 +129,7 @@ LoRaFactory::doGetChannels() const
 
   
 void
-LoRaFactory::LoRaParameters(uint8_t& CR, uint8_t& BW, uint8_t& SF, uint8_t& CH){
+LoRaFactory::LoRaParameters(uint8_t& CR, uint16_t& BW, uint8_t& SF, uint32_t& CH){
   
   // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
