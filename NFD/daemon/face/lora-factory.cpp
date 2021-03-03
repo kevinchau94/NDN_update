@@ -137,6 +137,13 @@ LoRaFactory::LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& chann
   std::string bandwidth = "BW_" + std::to_string(BW);
   std::string spreadingFactor = "SF_" + std::to_string(SF);
   std::string channel = "CH_" + std::to_string(channel1) + "_" + std::to_string(channel2);
+  
+  if (CR != 0){
+  std::int setParam = 1;  
+  }
+  else { 
+  std::int setParam = 0;
+  }
 }
   
 void
@@ -145,21 +152,29 @@ LoRaFactory::setup(){
   e = sx1272.ON();
   
   // Operating parameters affected by LoRaParameters function
-  //Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
-  //e = sx1272.setCR(codingRate);         // original CR value = CR_5
-  //e = sx1272.setBW(bandwidth);       // original BW value = BW_500
-  //e = sx1272.setSF(spreadingFactor);         // original SF value = SF_7
+  // Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
+  // Detect if there are new oprating parameter values, else use default
+  if (setParam == 1) {
+  e = sx1272.setCR(codingRate);         // original CR value = CR_5
+  e = sx1272.setBW(bandwidth);       // original BW value = BW_500
+  e = sx1272.setSF(spreadingFactor);         // original SF value = SF_7
+  }
+  else {
   e = sx1272.setCR(CR_5);
   e = sx1272.setBW(BW_500);
   e = sx1272.setSF(SF_7); 
-
+  }
+  
   // Set header
   e = sx1272.setHeaderON();
 
   // Select frequency channel
-  //e = sx1272.setChannel(channel);  // original CH value = CH_00_900
+  if (setParam == 1) {
+  e = sx1272.setChannel(channel);  // original CH value = CH_00_900
+  }
+  else {
   e = sx1272.setChannel(CH_00_900);
-
+  }
 
   // Set CRC
   e = sx1272.setCRC_ON();
