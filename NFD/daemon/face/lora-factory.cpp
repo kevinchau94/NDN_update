@@ -139,10 +139,10 @@ LoRaFactory::LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& chann
   std::string channel = "CH_" + std::to_string(channel1) + "_" + std::to_string(channel2);
   
   if (CR != 0){
-  std::int setParam = 1;  
+  setParam = 1;  
   }
   else { 
-  std::int setParam = 0;
+  setParam = 0;
   }
 }
   
