@@ -58,10 +58,10 @@ public:
   std::shared_ptr<LoRaChannel>
   createMultiCastChannel(std::string URI);
  
- /*
+ 
   explicit
-  LoRaParameters(int CR, int BW, int SF, int channel1, int channel2);
-  **
+  LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& channel2);
+  /**
         \edit LoRa module transmission parameters
         \added by K.Chau
   */
@@ -114,6 +114,9 @@ private:
   int e;
   std::string m;
   char my_packet[2048];
+  
+  // used for loraparamter function
+  int setParam;
 
   // Creating mutexes for shared queue and conditions for when data is produced from console
   pthread_mutex_t threadLock = PTHREAD_MUTEX_INITIALIZER; 
