@@ -2346,7 +2346,7 @@ int8_t SX1272::setPower(char p)
 	
   byte RegPaDacReg=(_board==SX1272Chip)?0x5A:0x4D;	
 	
-  #if (_debug > 0  |  _debug_mode > 0)	
+  #if (SX1272_debug_mode > 1)	
 	  printf("\n");	
 	  printf("Starting 'setPower'\n");	
   #endif	
