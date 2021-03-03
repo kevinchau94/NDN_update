@@ -59,7 +59,6 @@ public:
   createMultiCastChannel(std::string URI);
  
  
-  explicit
   void
   LoRaParameters(int& CR, int& BW, int& SF, int& channel1, int& channel2);
   /**
