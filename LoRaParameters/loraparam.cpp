@@ -19,8 +19,8 @@ int main () {
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
   std::getline(std::cin, input);
-  memcpy(param_CR, input.c_str(), std::min(input.length(), 8)); 
-  //param_CR = atoi (input.substr(0, 3).c_str ());
+  //memcpy(param_CR, input.c_str(), std::min(input.length(), 8)); 
+  param_CR = atoi (input.c_str ());
   std::cout << "The value of CR entered was: " << param_CR << std::endl;
   
   /*
