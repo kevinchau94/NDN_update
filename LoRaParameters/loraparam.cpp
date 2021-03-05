@@ -18,15 +18,19 @@ int main () {
   
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
+  /*
   std::getline(std::cin, input);
   std::stringstream ss (input);
   std::string temp;
   std::getline(ss, temp);
   uint64_t temp2 = stoul(temp, 0, 0);
   param_CR = static_cast<uint8_t>(temp2);
+  */
+  if (std::cin >> param_CR)
+    std::cout << "The value of CR entered was: " << param_CR << std::endl;
   //std::cout << "The value of CR entered was: " << input << std::endl;
   //param_CR = static_cast<uint8_t>(input);
-  std::cout << "The value of CR entered was: " << param_CR << std::endl;
+  //std::cout << "The value of CR entered was: " << param_CR << std::endl;
   
   /*
   //ask for and receive user input for BW 
