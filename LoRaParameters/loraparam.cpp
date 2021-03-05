@@ -20,9 +20,8 @@ int main () {
   std::cout << "Please enter the CR value (in format CR_#): ";
   std::getline(std::cin, input);
   std::cout << "The value of CR entered was: " << input << std::endl;
-  //memcpy(param_CR, input.c_str(), std::min(input.length(), 8)); 
-  //param_CR = atoi (input.c_str (), 8);
-  //std::cout << "The value of CR entered was: " << param_CR << std::endl;
+  param_CR = static_cast<uint8_t>(input);
+  std::cout << "The value of CR entered was: " << param_CR << std::endl;
   
   /*
   //ask for and receive user input for BW 
