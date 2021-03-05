@@ -13,7 +13,7 @@ int main () {
   
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
-  std::getline(std::cin, param_CR);
+  getline(std::cin, param_CR);
   std::cout << "The value of CR entered was: " << param_CR << std::endl;
   //ask for and receive user input for BW 
   std::cout << "Please enter the BW value (in format BW_#): ";
