@@ -27,7 +27,7 @@ int main () {
   param_CR = static_cast<uint8_t>(temp2);
   */
   if (std::cin >> input)
-    param_CR = reinterpret_cast<uint8_t>(input.c_str());
+    param_CR = reinterpret_cast<const uint8_t>(input.c_str());
     std::cout << "The value of CR entered was: " << param_CR << std::endl;
   //std::cout << "The value of CR entered was: " << input << std::endl;
   //param_CR = static_cast<uint8_t>(input);
