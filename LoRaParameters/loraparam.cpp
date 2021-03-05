@@ -19,6 +19,8 @@ int main () {
   std::getline(std::cin, input);
   std::istringstream iss(input);
   std::cout << "The value of CR entered was: " << param_CR << std::endl;
+  
+  /*
   //ask for and receive user input for BW 
   std::cout << "Please enter the BW value (in format BW_#): ";
   std::cin >> param_BW;
@@ -31,6 +33,7 @@ int main () {
   std::cout << "Please enter the CH value (in format CH_#_#): ";
   std::cin >> param_CH;
   std::cout << "The value of CH entered was: " << param_CH << std::endl;
+  */
   
   return 0;
 }
