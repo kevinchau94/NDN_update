@@ -12,7 +12,7 @@ uint32_t param_CH;
 
 int main () {
   
-  string input;
+  std::string input;
   
   std::cout << "Please enter LoRa Parameters." << std::endl;
   
