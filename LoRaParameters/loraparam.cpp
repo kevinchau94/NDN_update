@@ -17,7 +17,6 @@ int main () {
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
   std::getline(std::cin, input);
-  std::istringstream iss(input);
   param_CR = input;
   std::cout << "The value of CR entered was: " << param_CR << std::endl;
   
