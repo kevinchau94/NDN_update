@@ -2,6 +2,7 @@
 #include <string>
 #include <stdint.h>
 #include <cstring>
+#include <sstream>
 
 //uint8_t param_CR;
 uint8_t param_CR;
