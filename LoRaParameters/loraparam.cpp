@@ -2,7 +2,8 @@
 #include <string>
 #include <stdint.h>
 
-uint8_t param_CR;
+//uint8_t param_CR;
+uint8_t param_CR[8];
 uint16_t param_BW;
 uint8_t param_SF;
 uint32_t param_CH;
@@ -17,7 +18,8 @@ int main () {
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
   std::getline(std::cin, input);
-  param_CR = atoi (input.substr(0, 3).c_str ());
+  memcpy(param_CR, input.c_str(), min(input.length(), 8)); 
+  //param_CR = atoi (input.substr(0, 3).c_str ());
   std::cout << "The value of CR entered was: " << param_CR << std::endl;
   
   /*
