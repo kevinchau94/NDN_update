@@ -12,7 +12,7 @@ uint32_t param_CH;
 
 int main () {
   
-  std::string input;
+  string input;
   
   std::cout << "Please enter LoRa Parameters." << std::endl;
   
@@ -26,7 +26,8 @@ int main () {
   uint64_t temp2 = stoul(temp, 0, 0);
   param_CR = static_cast<uint8_t>(temp2);
   */
-  if (std::cin >> param_CR)
+  if (std::cin >> input)
+    param_CR = reinterpret_cast<uint8_t>(input.c_str());
     std::cout << "The value of CR entered was: " << unsigned(param_CR) << std::endl;
   //std::cout << "The value of CR entered was: " << input << std::endl;
   //param_CR = static_cast<uint8_t>(input);
