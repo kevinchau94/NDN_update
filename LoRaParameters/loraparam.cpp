@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string> 
 
-uint8_t param_CR[8];
-uint16_t param_BW[16];
-uint8_t param_SF[8];
-uint32_t param_CH[32];
+uint8_t * param_CR[8] = {part0, part1, part2, part3, part4, part5, part6, part7};
+uint16_t param_BW;
+uint8_t param_SF;
+uint32_t param_CH;
 
 int main () {
   
