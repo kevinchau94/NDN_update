@@ -9,11 +9,15 @@ uint32_t param_CH;
 
 int main () {
   
+  std::string input;
+  
+  
   std::cout << "Please enter LoRa Parameters." << std::endl;
   
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
-  getline(std::cin, param_CR);
+  std::getline(std::cin, input);
+  std::istringstream iss(input);
   std::cout << "The value of CR entered was: " << param_CR << std::endl;
   //ask for and receive user input for BW 
   std::cout << "Please enter the BW value (in format BW_#): ";
