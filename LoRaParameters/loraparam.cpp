@@ -6,7 +6,7 @@ uint16_t param_BW;
 uint8_t param_SF;
 uint32_t param_CH;
 
-int loraparaminput () {
+int main () {
   
   std::cout << "Please enter LoRa Parameters." << std::endl;
   
