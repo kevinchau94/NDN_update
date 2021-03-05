@@ -21,7 +21,7 @@ int main () {
   std::getline(std::cin, input);
   std::stringstream ss (input);
   std::string temp;
-  std::getline(ss, temp, ",");
+  std::getline(ss, temp);
   uint64_t temp2 = stoul(temp, 0, 0);
   param_CR = static_cast<uint8_t>(temp2);
   //std::cout << "The value of CR entered was: " << input << std::endl;
