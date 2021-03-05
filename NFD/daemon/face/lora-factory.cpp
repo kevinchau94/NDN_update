@@ -138,7 +138,7 @@ LoRaFactory::LoRaParameters(uint8_t& param_CR, uint16_t& param_BW, uint8_t& para
   spreadingFactor = param_SF;
   channel = param_CH;
   
-  if (CR != 0){
+  if (param_CR != 0){
   setParam = 1;  
   }
   else { 
