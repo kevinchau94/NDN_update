@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdint.h>
+#include <cstring>
 
 //uint8_t param_CR;
 uint8_t param_CR[8];
