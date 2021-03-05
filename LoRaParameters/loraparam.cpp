@@ -4,7 +4,7 @@
 #include <cstring>
 
 //uint8_t param_CR;
-uint8_t param_CR[8];
+uint8_t param_CR;
 uint16_t param_BW;
 uint8_t param_SF;
 uint32_t param_CH;
@@ -19,7 +19,7 @@ int main () {
   //ask for and receive user input for CR
   std::cout << "Please enter the CR value (in format CR_#): ";
   std::getline(std::cin, input);
-  stringstream ss (input);
+  std::stringstream ss (input);
   std::string temp;
   std::getline(ss, temp, ",");
   uint64_t temp2 = stoul(temp, 0, 0);
