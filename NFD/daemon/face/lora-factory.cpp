@@ -139,7 +139,8 @@ LoRaFactory::LoRaParameters(uint8_t& param_CR, uint16_t& param_BW, uint8_t& para
   channel = param_CH;
   
   if (param_CR != 0){
-  setParam = 1;  
+  setParam = 1;
+  std::cout << "New LoRa parameters entered." << std::endl;
   }
   else { 
   setParam = 0;
