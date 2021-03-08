@@ -136,11 +136,12 @@ LoRaFactory::LoRaParameters(int param_test){
   // set parameter values for CR, BW, SF, and frequency channel
   
   if (param_test == 5){
-  std::cout << " param_test variable successfully found. " << std::endl; 
+  std::cout << " param_test variable " << param_test << "successfully found. " << std::endl; 
   setParam = 1;
   }
   else {
   setParam = 0;
+  std::cout << "param_test not found" << std::endl;
   }
   
   /*
