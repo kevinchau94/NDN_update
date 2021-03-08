@@ -129,10 +129,21 @@ LoRaFactory::doGetChannels() const
 
   
 void
-LoRaFactory::LoRaParameters(uint8_t& param_CR, uint16_t& param_BW, uint8_t& param_SF, uint32_t& param_CH){
+//LoRaFactory::LoRaParameters(uint8_t& param_CR, uint16_t& param_BW, uint8_t& param_SF, uint32_t& param_CH){
+LoRaFactory::LoRaParameters(int param_test){
   
   // function implemented by K. Chau 
   // set parameter values for CR, BW, SF, and frequency channel
+  
+  if (param_test == 5){
+  std::cout << " param_test variable successfully found. " << std::endl; 
+  setParam = 1;
+  }
+  else {
+  setParam = 0;
+  }
+  
+  /*
   codingRate = param_CR;
   bandwidth = param_BW;
   spreadingFactor = param_SF;
@@ -144,7 +155,7 @@ LoRaFactory::LoRaParameters(uint8_t& param_CR, uint16_t& param_BW, uint8_t& para
   }
   else { 
   setParam = 0;
-  }
+  } */
 }
   
 void
@@ -159,11 +170,13 @@ LoRaFactory::setup(){
   e = sx1272.setCR(codingRate);         // original CR value = CR_5
   e = sx1272.setBW(bandwidth);       // original BW value = BW_500
   e = sx1272.setSF(spreadingFactor);         // original SF value = SF_7
+  NFD_LOG_INFO("New Lo-Ra parameters set.");
   }
   else {
   e = sx1272.setCR(CR_5);
   e = sx1272.setBW(BW_500);
   e = sx1272.setSF(SF_7); 
+  NFD_LOG_INFO("Default Lo-Ra parameters set.");
   }
   
   // Set header
