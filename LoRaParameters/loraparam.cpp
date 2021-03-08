@@ -9,15 +9,17 @@ uint8_t param_CR;
 uint16_t param_BW;
 uint8_t param_SF;
 uint32_t param_CH;
+int param_test;
 
 int main () {
   
-  std::string input;
+  //std::string input;
   
   std::cout << "Please enter LoRa Parameters." << std::endl;
   
   //ask for and receive user input for CR
-  std::cout << "Please enter the CR value (in format CR_#): ";
+  //std::cout << "Please enter the CR value (in format CR_#): ";
+  std::cout << "Please enter the param_test value";
   /*
   std::getline(std::cin, input);
   std::stringstream ss (input);
@@ -26,9 +28,10 @@ int main () {
   uint64_t temp2 = stoul(temp, 0, 0);
   param_CR = static_cast<uint8_t>(temp2);
   */
-  if (std::cin >> input)
-    param_CR = reinterpret_cast<const uint8_t>(input.c_str());
-    std::cout << "The value of CR entered was: " << param_CR << std::endl;
+  if (std::cin >> param_test){
+    //param_CR = reinterpret_cast<const uint8_t>(input.c_str());
+    std::cout << "The value of param_test entered was: " << param_test << std::endl;
+  }
   //std::cout << "The value of CR entered was: " << input << std::endl;
   //param_CR = static_cast<uint8_t>(input);
   //std::cout << "The value of CR entered was: " << param_CR << std::endl;
