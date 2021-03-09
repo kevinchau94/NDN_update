@@ -137,7 +137,7 @@ LoRaFactory::LoRaParameters(int param_test){
   // set parameter values for CR, BW, SF, and frequency channel
   
   if (param_test == 5){
-  NFD_LOG_INFO("param_test variable" + param_test + " successfully found.");
+  NFD_LOG_INFO("param_test variable" + std::to_string(param_test) + " successfully found.");
   setParam = 1;
   }
   else {
