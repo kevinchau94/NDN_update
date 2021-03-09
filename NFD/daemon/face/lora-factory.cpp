@@ -175,9 +175,9 @@ LoRaFactory::setup(){
   NFD_LOG_INFO("New Lo-Ra parameters set.");
   }
   else {
-  e = sx1272.setCR(CR_5);
+  e = sx1272.setCR(CR_7);
   e = sx1272.setBW(BW_500);
-  e = sx1272.setSF(SF_7); 
+  e = sx1272.setSF(SF_10); 
   NFD_LOG_INFO("Default Lo-Ra parameters set.");
   }
   
@@ -189,7 +189,7 @@ LoRaFactory::setup(){
   e = sx1272.setChannel(channel);  // original CH value = CH_00_900
   }
   else {
-  e = sx1272.setChannel(CH_00_900);
+  e = sx1272.setChannel(CH_12_900);
   }
 
   // Set CRC
