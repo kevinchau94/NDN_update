@@ -24,7 +24,7 @@ LoRaFactory::LoRaFactory(const CtorParams& params)
   : ProtocolFactory(params)
 {
   // Start the lora interface
-  LoRaParameters(int param_test); //check for new lora parameters, else use default values
+  //LoRaParameters(int param_test); //check for new lora parameters, else use default values
   setup();
   providedSchemes.insert("lora");
 
