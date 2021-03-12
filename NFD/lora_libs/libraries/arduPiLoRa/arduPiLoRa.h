@@ -50,6 +50,7 @@
 #define SX1272_SS 10
 
 #define LORA_RESET_PIN 1
+#define LORA_SX1276_RESET_PIN 5
 
 //! MACROS //
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)  // read a bit
@@ -1061,8 +1062,11 @@ public:
 	//added by C.EWELL
 	uint8_t	getchip();
 	uint8_t	setdebug(uint8_t debug);
+	uint8_t success(int success);
 	uint8_t setupLORA();
+	uint8_t getLoraSetup();
 	uint8_t _debug;
+	bool _check_for_change;
 
 	/// Variables /////////////////////////////////////////////////////////////
 
