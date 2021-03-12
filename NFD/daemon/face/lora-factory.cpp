@@ -130,6 +130,9 @@ LoRaFactory::doGetChannels() const
   
 void
 LoRaFactory::setup(){
+
+  sx1272.setupLORA();
+ 
   // Power ON the module
   /*
   //e = sx1272.ON();
