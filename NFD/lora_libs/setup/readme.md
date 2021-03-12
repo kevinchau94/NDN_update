@@ -1,0 +1,21 @@
+The lora_config file should be updated at your own risk. Doing so could cause errors upon initialization of the module. Only update it if you know what you are doing!
+
+The first line indicates if the LoRa is waiting for an update. 1 is update, 0 is no update needed.
+The second line is the debug value. This sets up how many messages you want.
+Third line is the coding rate. This affects the on-air time/speed and the amount of errors. Values: 5-8
+Fourth line is the Bandwidth. This affects the speed and range of the LoRa. Values: 125,250,500
+Fifth is the spreading factor. This affects the range of the LoRa. Values: 6-12
+Sixth is the frequency and channel. Needs to be the same as other LoRa to communicate. Values: 1-21
+Seventh is the Power value. This affects how much power the LoRa uses and hence stronger messages. Values 1-5
+Eighth is the Node address.
+
+Default values are below:
+
+0
+1
+7
+500
+10
+21
+2
+3
