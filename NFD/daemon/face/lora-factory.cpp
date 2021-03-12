@@ -24,7 +24,6 @@ LoRaFactory::LoRaFactory(const CtorParams& params)
   : ProtocolFactory(params)
 {
   // Start the lora interface
-  //LoRaParameters(int param_test); //check for new lora parameters, else use default values
   setup();
   providedSchemes.insert("lora");
 
@@ -130,48 +129,15 @@ LoRaFactory::doGetChannels() const
 
   
 void
-//LoRaFactory::LoRaParameters(uint8_t& param_CR, uint16_t& param_BW, uint8_t& param_SF, uint32_t& param_CH){
-LoRaFactory::LoRaParameters(int param_test){
-  
-  // function implemented by K. Chau 
-  // set parameter values for CR, BW, SF, and frequency channel
-  
-  if (param_test == 5){
-  NFD_LOG_INFO("param_test variable" + std::to_string(param_test) + " successfully found.");
-  setParam = 1;
-  }
-  else {
-  setParam = 0;
-  NFD_LOG_INFO("param_test variable not found or not equal to int 5");
-  }
-  
-  /*
-  codingRate = param_CR;
-  bandwidth = param_BW;
-  spreadingFactor = param_SF;
-  channel = param_CH;
-  
-  if (param_CR != 0){
-  setParam = 1;
-  std::cout << "New LoRa parameters entered." << std::endl;
-  }
-  else { 
-  setParam = 0;
-  } */
-}
-  
-void
 LoRaFactory::setup(){
   // Power ON the module
-  e = sx1272.ON();
+  /*
+  //e = sx1272.ON();
   
   // Operating parameters affected by LoRaParameters function
   // Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
   // Detect if there are new oprating parameter values, else use default
-  if (setParam == 1) {
-  e = sx1272.setCR(codingRate);         // original CR value = CR_5
-  e = sx1272.setBW(bandwidth);       // original BW value = BW_500
-  e = sx1272.setSF(spreadingFactor);         // original SF value = SF_7
+
   NFD_LOG_INFO("New Lo-Ra parameters set.");
   }
   else {
@@ -200,6 +166,7 @@ LoRaFactory::setup(){
 
   // Set the node address
   e = sx1272.setNodeAddress(3);
+  */
 
   // Set the LoRa into receive mode by default
   e = sx1272.receive();
@@ -210,12 +177,18 @@ LoRaFactory::setup(){
   // Modified by C.EWELL
   e = sx1272.getchip();
   if (e == SX1272Chip){
+    sx1272.success(1);  
     NFD_LOG_INFO("SX1272 successfully configured");
     delay(1000);
   }
-  else {
+  else if (e == SX1276Chip){
+    sx1272.success(2);
     NFD_LOG_INFO("SX1276 successfully configured");
     delay(1000);
+  }
+  else {
+  sx1272.success(3);
+  delay(1000);
   }
 }
 
@@ -228,6 +201,10 @@ void *LoRaFactory::transmit_and_recieve()
   try
   {
     while(true){
+      
+        // checks to see if the LoRa needs to update
+        sx1272.getLoraSetup(); 
+      
         // sendBufferQueue shared resouce
         pthread_mutex_lock(&threadLock);
 
