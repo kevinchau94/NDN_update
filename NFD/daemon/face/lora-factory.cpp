@@ -161,7 +161,7 @@ LoRaFactory::setup(){
 
   // Set the node address
   e = sx1272.setNodeAddress(3);
-  */
+  //*/
 
   // Set the LoRa into receive mode by default
   e = sx1272.receive();
