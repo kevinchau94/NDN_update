@@ -23,7 +23,7 @@ int main () {
   param_CR = new uint8_t[param_test.length() + 1];
   memcpy (param_CR, param_test.c_str(), param_test.length() + 1);
   
-  
+  std::cout << param_CR << std::endl;
   
   
   
