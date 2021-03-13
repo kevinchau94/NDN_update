@@ -131,35 +131,27 @@ LoRaFactory::doGetChannels() const
 void
 LoRaFactory::setup(){
 
-  sx1272.setupLORA();
+  //sx1272.setupLORA();
  
   // Power ON the module
-  /*
-  //e = sx1272.ON();
+  //*
+  e = sx1272.ON();
   
   // Operating parameters affected by LoRaParameters function
   // Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
   // Detect if there are new oprating parameter values, else use default
 
-  NFD_LOG_INFO("New Lo-Ra parameters set.");
-  }
-  else {
   e = sx1272.setCR(CR_7);
   e = sx1272.setBW(BW_500);
   e = sx1272.setSF(SF_10); 
   NFD_LOG_INFO("Default Lo-Ra parameters set.");
-  }
   
   // Set header
   e = sx1272.setHeaderON();
 
   // Select frequency channel
-  if (setParam == 1) {
-  e = sx1272.setChannel(channel);  // original CH value = CH_00_900
-  }
-  else {
+  //e = sx1272.setChannel(channel);  // original CH value = CH_00_900
   e = sx1272.setChannel(CH_12_900);
-  }
 
   // Set CRC
   e = sx1272.setCRC_ON();
