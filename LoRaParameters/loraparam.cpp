@@ -20,7 +20,7 @@ int main () {
   //std::cout << "Please enter the CR value (in format CR_#): ";
   
   std::cin >> param_test;
-  param_CR = new uint8_t[str.length() + 1];
+  param_CR = new uint8_t[param_test.length() + 1];
   memcpy (param_CR, param_test.c_str(), param_test.length() + 1);
   
   
