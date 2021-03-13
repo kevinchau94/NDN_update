@@ -10,7 +10,7 @@ uint16_t* param_BW;
 uint8_t* param_SF;
 uint32_t* param_CH;
 //int param_test;
-string param_test;
+std::string param_test;
 
 int main () {
   
