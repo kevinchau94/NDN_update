@@ -24,6 +24,7 @@ int main () {
   memcpy (param_CR, param_test.c_str(), param_test.length() + 1);
   
   std::cout << param_CR << std::endl;
+  typeid(param_CR).name();
   
   
   
