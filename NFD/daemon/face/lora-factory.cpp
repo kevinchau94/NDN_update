@@ -131,10 +131,10 @@ LoRaFactory::doGetChannels() const
 void
 LoRaFactory::setup(){
 
-  //sx1272.setupLORA();
+  e = sx1272.setupLORA();
  
   // Power ON the module
-  //*
+  /*
   e = sx1272.ON();
   
   // Operating parameters affected by LoRaParameters function
@@ -161,7 +161,7 @@ LoRaFactory::setup(){
 
   // Set the node address
   e = sx1272.setNodeAddress(3);
-  //*/
+  */
 
   // Set the LoRa into receive mode by default
   e = sx1272.receive();
