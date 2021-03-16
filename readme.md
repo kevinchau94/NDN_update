@@ -15,7 +15,7 @@ The libraries used are as follows:
 
 Software:
 - Raspbian 10 Buster
-- Clang 8
+- Clang 9
 - [NFD](https://github.com/named-data/NFD) - NDN forwarding software.
 - [NDN-Tools](https://github.com/named-data/ndn-tools) - Simple command-line tools for testing NFD and NDN applications.
 
@@ -24,7 +24,7 @@ Prior knowledge of Linux, the command line, C++, Python, compilation, and instal
 
 Raspbian and Rasbian Lite were both tested working for this project. Raspbian Lite is recommended for the lighter memory usage.
 
-After installing Raspbian Lite on the Raspberry Pi, Clang 8 must be installed. [Here](https://solarianprogrammer.com/2018/04/22/raspberry-pi-raspbian-install-clang-compile-cpp-17-programs/) is an article about installing Clang 8 on the Pi. Newer versions have not been tested with this project (but will likely work).
+After installing Raspbian Lite on the Raspberry Pi, Clang 9 must be installed. [Here](https://solarianprogrammer.com/2018/04/22/raspberry-pi-raspbian-install-clang-compile-cpp-17-programs/) is an article about installing Clang 9 on the Pi. Newer versions have not been tested with this project (but will likely work).
 
 
 ### Compiling & Installation
@@ -37,6 +37,12 @@ sudo apt-get install build-essential pkg-config libboost-all-dev \
                      libsqlite3-dev libssl-dev libpcap-dev
 ```
 
+Download the git files:
+```
+git clone --recursive https://github.com/kevinchau94/NDN_over_LoRa.git
+```
+	
+Navigate to the NDN_over_loRa folder.
 Compile and install the modified library in the `ndn-cxx` folder first from the command line:
 ```
 cd ndn-cxx
@@ -47,14 +53,13 @@ sudo ./waf install
 sudo ldconfig
 ```
 
-
 Next, compile and install the modified library in the `NFD` folder:
 ```
 cd NFD
 sudo chmod u+x ./waf
 CXX=clang++ ./waf configure
 ```
-At this point if it says that something is missing (websocket app) then follow the instructions to add it, the instructions will be something like:
+At this point if it says that something is missing (websocket app) then follow the instructions to add it, the instructions will be:
 ```
 mkdir -p websocketpp
 curl -L https://github.com/cawka/websocketpp/archive/0.8.1-hotfix.tar.gz > websocketpp.tar.gz
@@ -67,7 +72,7 @@ sudo ./waf install
 ```
 Copy the modified NFD configuration file from the root directory to the correct location:
 ```
-cp nfd.conf /usr/local/etc/ndn/nfd.conf
+sudo cp nfd.conf /usr/local/etc/ndn/nfd.conf
 ```
 
 Finally, compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
@@ -83,7 +88,36 @@ sudo ./waf install
 
 The -j2 flag is used to limit the number of simultaneous compilations to 2 jobs. This is done to reduce memory usage. Successful compilation has been achieved with 3 jobs, but has also needed to be limited to 1 job depending on what other software is running on the Pi at the time of compilation.
 
-
+#### LoRa Configuration
+The following commands are to compile the lora configuration commands. The LoRa takes its setting values from a text file, and these commands will alter the text file or read it.
+```
+cd NFD/lora_libs/setup/
+clang++ getLoraSetup.cpp -o getlora
+clang++ setuplora.cpp -o setlora
+sudo cp -r getlora /usr/local/bin
+sudo cp -r setlora /usr/local/bin
+```
+You can now run the commands from anywhere via the command console.
+```
+getlora
+setlora
+```
+#### Testing GPIO (Optional)
+The following compiles the test GPIO. 
+```
+cd test
+clang++ -pthread *.cpp -o testGPIO
+```
+You can move it to the bin directory if you want to be able to run the command from anywhere:
+```
+sudo cp -r testGPIO /usr/local/bin
+```
+Run the command with either of the following: (the first one requires you to be in the test folder and the second requires the executable to be in the /bin folder.
+DO NOT have anything wired to the Pi while this is being done!
+```
+sudo ./testGPIO
+testGPIO
+```
 #### Susbsequent Compilations
 Once everything has been compiled for the first time and tested working, if any changes are made the compilation and installation will go much faster and requires fewer steps.
 
@@ -109,6 +143,12 @@ Make sure the SX1272/SX1276 module is connected to the Raspberry Pi. Make sure t
 Test out NFD locally or with a face other than LoRa first.
 Creating a face and connecting to other NFD daemons can be found at [Getting Started with NFD](https://named-data.net/doc/NFD/current/INSTALL.html) & [NDN-tools testing](https://github.com/named-data/ndn-tools).
 
+#### Starting and Stopping NFD
+```
+sudo NFD -start
+
+sudo NFD -stop
+```
 #### Creating a LoRa Face
 2 or more Raspberry Pis with LoRa modules will need to be set up for this test.
 
@@ -133,7 +173,7 @@ Add another face if you want to make a connection to another node.
 
 Follow the same instructions for the next node with the appropriate ids.
 
-To make a broadcast face use the following command: (face id can be a number other than 1)
+To make a broadcast/multicast face use the following command: (face id can be a number other than 1)
 
 ```
 nfdc face create lora://1
@@ -144,9 +184,9 @@ Using ndn-tools:
 
 On one Pi, produce a packet:
 ```
-echo "test" | ndnpoke -x 1000 /ndn
+echo "test" | ndnpoke -x 1000 /ndn 
 ```
--x specifies the freshness of the packet
+-x specifies the freshness of the packet (time is in ms)
 
 /ndn is the name to produce the packet on
 
