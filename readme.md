@@ -104,6 +104,7 @@ You can now run the commands from anywhere via the command console.
 ```
 getlora
 setlora
+resetlora
 ```
 #### Testing GPIO (Optional)
 The following compiles the test GPIO. 
