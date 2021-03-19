@@ -9,7 +9,7 @@ cd ~
 
 Then grab the full NDN repository:
 ```
-sudo git clone --recursive https://github.com/Jiuro/NDN_over_LoRa.git
+sudo git clone --recursive https://github.com/kevinchau94/NDN_over_LoRa
 ```
 
 Next:
