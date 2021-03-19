@@ -31,14 +31,11 @@
  ******************************************************************************/
 
 #include <stdint.h>
-#include "../../arduPi/arduPi.h"
+#include "arduPi.h"
 
 #ifndef inttypes_h
 	#include <inttypes.h>
 #endif
-
-#include <string>
-using namespace std;
 
 /******************************************************************************
  * Definitions & Declarations
@@ -52,9 +49,7 @@ using namespace std;
 
 #define SX1272_SS 10
 
-//#define LORA_RESET_PIN 1
-#define LORA_RESET_PIN 3
-#define LORA_SX1276_RESET_PIN 5
+#define LORA_RESET_PIN 1
 
 //! MACROS //
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)  // read a bit
@@ -255,9 +250,6 @@ const uint8_t MAX_RETRIES = 5;
 const uint8_t CORRECT_PACKET = 0;
 const uint8_t INCORRECT_PACKET = 1;
 
-	//Added by C.Ewell for RX calibration
-const uint8_t RX_CAL = 0x40;
-const uint8_t RX_CAL_RUNNING = 0x20;
 
 //! Structure :
 /*!
@@ -1069,25 +1061,8 @@ public:
 	//added by C.EWELL
 	uint8_t	getchip();
 	uint8_t	setdebug(uint8_t debug);
-	uint8_t success(int success);
 	uint8_t setupLORA();
-	uint8_t getLoraSetup();
-	uint8_t resetLora();
-	uint8_t writeLoraConfig(string d_v, string c_v, string b_v, string sf_v, string f_v, string p_v, string n_v);
-	uint8_t RxCalibration();
 	uint8_t _debug;
-	int temp_cal = 18;
-	bool _check_for_change;
-	bool _change_node;
-	string change_value;
-  	string debug_value;
-	string codingRate_value;
-	string bandwidth_value;
-	string spreadingfactor_value;
-	string frequency_value;
-	string power_value;
-	string node_value;
-
 
 	/// Variables /////////////////////////////////////////////////////////////
 

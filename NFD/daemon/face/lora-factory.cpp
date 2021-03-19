@@ -283,6 +283,8 @@ LoRaFactory::sendPacket()
       uint8_t id = ids->first;
       
       // Set LoRa source to ID
+      //Edited by C.Ewell
+      sx1272._change_node = true;
       if ((e = sx1272.setNodeAddress(id)) != 0) {
         NFD_LOG_ERROR("Unable to set src ID to " << std::to_string(id));
       }

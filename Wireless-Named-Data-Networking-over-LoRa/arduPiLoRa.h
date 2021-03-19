@@ -52,7 +52,6 @@ using namespace std;
 
 #define SX1272_SS 10
 
-//#define LORA_RESET_PIN 1
 #define LORA_RESET_PIN 3
 #define LORA_SX1276_RESET_PIN 5
 

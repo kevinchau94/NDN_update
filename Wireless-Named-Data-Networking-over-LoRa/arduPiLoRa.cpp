@@ -46,14 +46,14 @@ using namespace std;
 */
 uint8_t SX1272::ON()
 {
-pinMode(LORA_SX1276_RESET_PIN, OUTPUT);
+	pinMode(LORA_SX1276_RESET_PIN, OUTPUT);
   	digitalWrite(LORA_SX1276_RESET_PIN, HIGH);
 	delayMicroseconds(100);
 	digitalWrite(LORA_SX1276_RESET_PIN, LOW);
 	delayMicroseconds(100);
 	digitalWrite(LORA_SX1276_RESET_PIN, HIGH);
 	delayMicroseconds(1000);
-  uint8_t state = 2;
+  	uint8_t state = 2;
 
 	//Added by C.EWELL for the Detection of SX1276 or SX1272 chip.
 	_board=getchip();
@@ -80,21 +80,7 @@ if (_debug > 0){ //#if (_debug > 0  ||  SX1272_debug_mode > 0)  //modified by C.
   // 2.- reset pulse for LoRa module initialization
   // Modified by C.Ewell
   resetLora();
-  /*
-  if (_board==SX1272Chip){
-  	pinMode(LORA_RESET_PIN, OUTPUT);
-  	digitalWrite(LORA_RESET_PIN, HIGH);
-  	delay(100);
-  }
-  else {
-	pinMode(LORA_SX1276_RESET_PIN, OUTPUT);
-  	digitalWrite(LORA_SX1276_RESET_PIN, HIGH);
-  	delay(100);
-  }
-
-  digitalWrite(LORA_RESET_PIN, LOW);
-  delay(100);
-  */
+  
 
   // 3.- SPI chip select
   pinMode(SX1272_SS,OUTPUT);
@@ -2604,7 +2590,7 @@ int8_t SX1272::setNodeAddress(uint8_t addr)
 		printf("Starting 'setNodeAddress'\n");
 	}//#endif
 
-//added by C.Ewell
+	//added by C.Ewell
 	if (_change_node == true)
 	{
 		_change_node = false;
@@ -2808,7 +2794,7 @@ int16_t SX1272::getRSSIpacket()
 	  {
 		  if( _SNR < 0 )
 		  {
-			   _RSSIpacket = readRegister(REG_PKT_RSSI_VALUE);
+			  _RSSIpacket = readRegister(REG_PKT_RSSI_VALUE);
 			  _RSSIpacket = -(OFFSET_RSSI+(_board==SX1276Chip?20:0)) + ( double )_RSSIpacket + (double)_SNR;
 			//   _RSSIpacket = -NOISE_ABSOLUTE_ZERO + 10.0 * SignalBwLog[_bandwidth] + NOISE_FIGURE + ( double )_SNR;
 			  state = 0;
@@ -3321,6 +3307,10 @@ uint8_t SX1272::receivePacketTimeout(uint16_t wait)
 		{
 			// If packet received, getPacket
 			state_f = getPacket();
+
+			//getRSSIpacket();
+			//getRSSI();
+			 //getSNR();
 		}
 		else
 		{
@@ -3385,6 +3375,7 @@ uint8_t SX1272::receivePacketTimeoutACK(uint16_t wait)
 		if( availableData(wait) )
 		{
 			state = getPacket();
+			//getRSSIpacket();
 		}
 		else
 		{
@@ -4384,10 +4375,10 @@ uint8_t SX1272::setPacket(uint8_t dest, char *payload)
 	int8_t state = 2;
 
 
-	#if (SX1272_debug_mode > 1)
+	if (_debug > 0){ //#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacket'\n");
-	#endif
+	} //#endif
 
 	clearFlags();	// Initializing flags
 
@@ -4480,10 +4471,10 @@ uint8_t SX1272::setPacket(uint8_t dest, char *payload, uint16_t payloadLength)
 	int8_t state = 2;
 
 
-	#if (SX1272_debug_mode > 1)
+	if (_debug > 0){ //#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacket'\n");
-	#endif
+	} //#endif
 
 	clearFlags();	// Initializing flags
 
@@ -4574,10 +4565,10 @@ uint8_t SX1272::setPacket(uint8_t dest, uint8_t *payload)
 	int8_t state = 2;
 	byte st0;
 
-	#if (SX1272_debug_mode > 1)
+	if (_debug > 0){ //#if (SX1272_debug_mode > 1)
 		printf("\n");
 		printf("Starting 'setPacket'\n");
-	#endif
+	} //#endif
 
 	st0 = readRegister(REG_OP_MODE);	// Save the previous status
 	clearFlags();	// Initializing flags
@@ -5518,18 +5509,12 @@ uint8_t	SX1272::getchip()
 
     if (version == 0x22) {
         // sx1272
-        //printf("SX1272 detected, starting.\n");
         chip = SX1272Chip;
     } else {
         // sx1276?
-        digitalWrite(SX1272_RST, LOW);
-        delay(100);
-        digitalWrite(SX1272_RST, HIGH);
-        delay(100);
         version = readRegister(REG_VERSION);
         if (version == 0x12) {
             // sx1276
-            //printf("SX1276 detected, starting.\n");
             chip = SX1276Chip;
         } else {
             //printf("Unrecognized transceiver.\n");
@@ -5578,7 +5563,7 @@ uint8_t SX1272::setupLORA()
 	int pv=0; //power value
 	int nv=0; //node value
 
-  	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+  	ifstream myfile ("/home/pi/Wireless-Named-Data-Networking-over-LoRa/lora_libs/setup/lora_config.txt");
   	if (myfile.is_open())
   	{
 		_check_for_change = false;
@@ -5699,10 +5684,10 @@ uint8_t SX1272::setupLORA()
 		cin.clear(); 
 		stringstream val7(node_value);//change string to int
 		val7 >> nv; //change string to int
-  		setNodeAddress(nv);   //Does this do anything? The register is wrong in LoRa mode, node address only exists in FSK 
+		setNodeAddress(nv);   //Does this do anything? The register is wrong in LoRa mode, node address only exists in FSK 
 
-	myfile.close();// closes the program if open.
-	writeLoraConfig(debug_value, codingRate_value, bandwidth_value, spreadingfactor_value, frequency_value, power_value, node_value);
+		myfile.close();// closes the program if open.
+		writeLoraConfig(debug_value, codingRate_value, bandwidth_value, spreadingfactor_value, frequency_value, power_value, node_value);
   	}
 
   else cout << "Error: Unable to open file. Stop the program!";
@@ -5728,7 +5713,7 @@ uint8_t SX1272::getLoraSetup()
 	bool need_change=true; //lora defaults as needing to change
 	int cont_change=0;
 	int gv = 0; //which line are we on
-	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	ifstream myfile ("/home/pi/Wireless-Named-Data-Networking-over-LoRa/lora_libs/setup/lora_config.txt");
   	if (myfile.is_open())
   	{
 		while(getline(myfile, getV) && need_change==true)
@@ -5844,7 +5829,7 @@ uint8_t SX1272::resetLora()
 uint8_t SX1272::writeLoraConfig(string d_v, string c_v, string b_v, string sf_v, string f_v, string p_v, string n_v)
 {
 	fstream newfile;
-	newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+	newfile.open("/home/pi/Wireless-Named-Data-Networking-over-LoRa/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
 	if(newfile.is_open())     //checking whether the file is open
 	{
 		newfile<<"0\n";
