@@ -42,6 +42,7 @@ Download the git files:
 git clone --recursive https://github.com/kevinchau94/NDN_over_LoRa.git
 ```
 	
+#### Compile the NDN Directory
 Navigate to the NDN_over_loRa folder.
 Compile and install the modified library in the `ndn-cxx` folder first from the command line:
 ```
@@ -53,6 +54,7 @@ sudo ./waf install
 sudo ldconfig
 ```
 
+#### Compile the NFD Directory
 Next, compile and install the modified library in the `NFD` folder:
 ```
 cd NFD
@@ -75,6 +77,7 @@ Copy the modified NFD configuration file from the root directory to the correct 
 sudo cp nfd.conf /usr/local/etc/ndn/nfd.conf
 ```
 
+#### Compile the NDN-Tools Directory
 Finally, compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
 ```
 cd ndn-tools
@@ -94,8 +97,8 @@ The following commands are to compile the lora configuration commands. The LoRa 
 cd NFD/lora_libs/setup/
 clang++ getLoraSetup.cpp -o getlora
 clang++ setuplora.cpp -o setlora
-sudo cp -r getlora /usr/local/bin
-sudo cp -r setlora /usr/local/bin
+clang++ resetlora.cpp -o resetlora
+sudo cp -r getlora setlora resetlora /usr/local/bin
 ```
 You can now run the commands from anywhere via the command console.
 ```
