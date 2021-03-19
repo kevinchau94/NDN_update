@@ -31,5 +31,5 @@ Then go back to the main instructions and compile the NFD directory and the LoRa
 If you wish to delete this folder, as it will no longer be used, use the following:
 ```
 cd ~
-sudo rm NDN_over_LoRa
+sudo rm -r NDN_over_LoRa
 ```
