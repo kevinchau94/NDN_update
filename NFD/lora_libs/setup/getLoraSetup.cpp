@@ -10,7 +10,8 @@ int main () {
 	string getV;
 	int i=0;
 	int gv = 0; //which line are we on
-	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	//ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	ifstream myfile ("lora_config.txt");
   	if (myfile.is_open())
   	{
 		cout<<"\n******************************************************************************\n";
