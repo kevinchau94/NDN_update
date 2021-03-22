@@ -5708,7 +5708,7 @@ uint8_t SX1272::setupLORA()
 
   else {
 	  cout << "Error: Unable to open file. Stop the program!";
-	  break;
+	  exit (EXIT_FAILURE);
   }
 
   return 0;
@@ -5822,7 +5822,7 @@ uint8_t SX1272::getLoraSetup()
 	}
   	else {
 		cout << "Error: Unable to open file. Stop the program!\n";
-		break;
+		exit (EXIT_FAILURE);
 	}
 
   return 0;
