@@ -5551,7 +5551,7 @@ uint8_t SX1272::success(int success)//print a success message if the lora config
 	switch(success){
 		case 1: printf("SX1272 successfully configured.\n"); break;
 		case 2: printf("SX1276 successfully configured.\n"); break;
-		default: printf("Error: LoRa unsuccessfully configured. Please stop the program!\n");
+		default: printf("Error: LoRa unsuccessfully configured. Please stop the program!\n"); break;
 	}
 	return 0;
 }
@@ -5578,7 +5578,8 @@ uint8_t SX1272::setupLORA()
 	int pv=0; //power value
 	int nv=0; //node value
 
-  	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+  	//ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	ifstream myfile ("lora_config.txt");
   	if (myfile.is_open())
   	{
 		_check_for_change = false;
@@ -5705,7 +5706,10 @@ uint8_t SX1272::setupLORA()
 	writeLoraConfig(debug_value, codingRate_value, bandwidth_value, spreadingfactor_value, frequency_value, power_value, node_value);
   	}
 
-  else cout << "Error: Unable to open file. Stop the program!";
+  else {
+	  cout << "Error: Unable to open file. Stop the program!";
+	  break;
+  }
 
   return 0;
 }
@@ -5728,7 +5732,8 @@ uint8_t SX1272::getLoraSetup()
 	bool need_change=true; //lora defaults as needing to change
 	int cont_change=0;
 	int gv = 0; //which line are we on
-	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	//ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	ifstream myfile ("lora_config.txt");
   	if (myfile.is_open())
   	{
 		while(getline(myfile, getV) && need_change==true)
@@ -5815,7 +5820,10 @@ uint8_t SX1272::getLoraSetup()
 
 
 	}
-  	else cout << "Error: Unable to open file. Stop the program!\n";
+  	else {
+		cout << "Error: Unable to open file. Stop the program!\n";
+		break;
+	}
 
   return 0;
 }
@@ -5844,7 +5852,8 @@ uint8_t SX1272::resetLora()
 uint8_t SX1272::writeLoraConfig(string d_v, string c_v, string b_v, string sf_v, string f_v, string p_v, string n_v)
 {
 	fstream newfile;
-	newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+	//newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+	newfile.open("lora_config.txt",ios::out); // open a file to perform write operation using file object
 	if(newfile.is_open())     //checking whether the file is open
 	{
 		newfile<<"0\n";
