@@ -28,7 +28,8 @@ int main ()
 	int menu_choice;
 	bool menu = false;
 
-	ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	//ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	ifstream myfile ("lora_config.txt");
   	if (myfile.is_open())
   	{
 		  //get debug value
@@ -55,7 +56,8 @@ int main ()
 	}
 
 	fstream newfile;
-   	newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+   	//newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+	newfile.open("lora_config.txt",ios::out); // open a file to perform write operation using file object
    	if(newfile.is_open())     //checking whether the file is open
    	{
 
