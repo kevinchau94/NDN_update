@@ -1,5 +1,5 @@
 # Wireless Named Data Networking Over LoRa
-This repository contains the project and work done to add a LoRa networking face to the Named Data Networking protocol based fowarading software [NFD](https://github.com/named-data/NFD).
+This repository contains the project and work done to add a LoRa networking face to the Named Data Networking protocol based fowarding software [NFD](https://github.com/named-data/NFD).
 
 ## Installation & Usage
 ### Hardware and Libraries
