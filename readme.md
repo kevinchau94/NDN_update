@@ -62,6 +62,7 @@ sudo chmod u+x ./waf
 CXX=clang++ ./waf configure
 ```
 At this point if it says that something is missing (websocket app) then follow the instructions to add it, the instructions will be:
+
 NOTE - skip to "Copy the modified NFD configuration..." if you do not see that websockets are missing in the configuration process.
 ```
 mkdir -p websocketpp
