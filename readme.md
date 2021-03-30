@@ -108,6 +108,8 @@ getlora
 setlora
 resetlora
 ```
+#### Updating Directory
+These series of commands allows you to pull the latest updates from Github onto your Pi.
 If you have old/local changes on your Pi, you can reset those changes with the following command:
 ```
 git reset --hard 
