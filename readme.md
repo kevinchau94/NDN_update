@@ -122,11 +122,13 @@ this will reset the permission for ./waf so set the permissions back with
 ```
 chmod u+x ./waf
 ```
-and then update the rest of NFD with a recompile and install.
+and then update the rest of NFD with a recompile and install. (use cd command if you are not in the NFD folder already)
 ```
+cd NFD 
 ./waf -j2
 sudo ./waf install
 ```
+You can do the following for ndn-cxx, ndn-tools, or any other folder as necessary.
 
 #### Testing GPIO (Optional)
 The following compiles the test GPIO. 
