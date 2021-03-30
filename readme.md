@@ -108,6 +108,24 @@ getlora
 setlora
 resetlora
 ```
+If you have old/local changes on your Pi, you can reset those changes with the following command:
+```
+git reset --hard 
+```
+and grab the Github repository's updates with 
+```
+git pull https://github.com/kevinchau94/NDN_over_LoRa.git
+```
+this will reset the permission for ./waf so set the permissions back with
+```
+chmod u+x ./waf
+```
+and then update the rest of NFD with a recompile and install.
+```
+./waf -j2
+sudo ./waf install
+```
+
 #### Testing GPIO (Optional)
 The following compiles the test GPIO. 
 ```
