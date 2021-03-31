@@ -3677,7 +3677,7 @@ int8_t SX1272::getPacket()
 {
 	getRSSIpacket();
 	getRSSI();
-	getSNR();
+	//getSNR();
 	return getPacket(MAX_TIMEOUT);
 }
 
