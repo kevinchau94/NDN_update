@@ -41,7 +41,11 @@ Download the git files:
 ```
 git clone --recursive https://github.com/kevinchau94/NDN_over_LoRa.git
 ```
-	
+Open the Directory:
+```
+cd NDN_over_LoRa
+```	
+
 #### Compile the NDN Directory
 Navigate to the NDN_over_loRa folder.
 Compile and install the modified library in the `ndn-cxx` folder first from the command line:
@@ -57,7 +61,7 @@ sudo ldconfig
 #### Compile the NFD Directory
 Next, compile and install the modified library in the `NFD` folder:
 ```
-cd NFD
+cd ../NFD
 sudo chmod u+x ./waf
 CXX=clang++ ./waf configure
 ```
@@ -82,7 +86,7 @@ sudo cp nfd.conf /usr/local/etc/ndn/nfd.conf
 #### Compile the NDN-Tools Directory
 Finally, compile and install ndn-tools. The version provided in the `ndn-tools` folder has not been modified so a new version may be installed from [https://github.com/named-data/ndn-tools](https://github.com/named-data/ndn-tools) by following the instructions posted there. However the `ndn-tools` folder contains a tested working version and can be compiled and installed as follows:
 ```
-cd ndn-tools
+cd ../ndn-tools
 sudo chmod u+x ./waf
 CXX=clang++ ./waf configure
 ./waf -j2
@@ -96,11 +100,14 @@ The -j2 flag is used to limit the number of simultaneous compilations to 2 jobs.
 #### LoRa Configuration
 The following commands are to compile the lora configuration commands. The LoRa takes its setting values from a text file, and these commands will alter the text file or read it.
 ```
-cd NFD/lora_libs/setup/
+cd ../NFD/lora_libs/setup/
 clang++ getLoraSetup.cpp -o getlora
 clang++ setuplora.cpp -o setlora
 clang++ resetlora.cpp -o resetlora
 sudo cp -r getlora setlora resetlora /usr/local/bin
+sudo cp -r 'LoRa Configuration' /usr/local
+sudo chmod a+w+r /usr/local/'LoRa Configuration'
+sudo chmod a+w+r /usr/local/'LoRa Configuration'/lora_config.txt
 ```
 You can now run the commands from anywhere via the command console.
 ```
@@ -252,6 +259,10 @@ Modified/Added files:
 - NFD/lora_libs/arduPi/arduPi.h
 - ndnScripts/*
 - nfd.conf
+- NFD/lora_libs/setup/setuplora.cpp
+- NFD/lora_libs/setup/getLoraSetup.cpp
+- NFD/lora_libs/setup/resetlora.cpp
+- NFD/lora_libs/setup/'LoRa Configuration'
 
 ## Authors, Contributors, & Resources
 [Named Data software and libraries](https://github.com/named-data) were modified by:
