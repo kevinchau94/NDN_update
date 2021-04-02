@@ -5,8 +5,6 @@
 #include <sstream>
 using namespace std;
 
-string filepath = "/usr/local/LoRa Configuration/lora_config.txt";
-
 int main () 
 {
   	string line;
@@ -20,8 +18,6 @@ int main ()
 	string F;
 	string P;
 	string NA;
-	string HM;
-	string TC;
 
 
 	int e =0;
@@ -31,7 +27,8 @@ int main ()
 	int menu_choice;
 	bool menu = false;
 
-	ifstream myfile (filepath);
+	//ifstream myfile ("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt");
+	ifstream myfile ("lora_config.txt");
   	if (myfile.is_open())
   	{
 		  //get debug value
@@ -46,8 +43,6 @@ int main ()
 				case 5: F = line; break;
 				case 6: P = line; break;
 				case 7: NA = line; break;
-				case 8: HM = line; break;
-				case 9: TC = line; break;
 			}
 			i++;
 			
@@ -60,7 +55,8 @@ int main ()
 	}
 
 	fstream newfile;
-   	newfile.open(filepath,ios::out);  // open a file to perform write operation using file object
+   	//newfile.open("/home/pi/NDN_over_LoRa/NFD/lora_libs/setup/lora_config.txt",ios::out);  // open a file to perform write operation using file object
+	newfile.open("lora_config.txt",ios::out); // open a file to perform write operation using file object
    	if(newfile.is_open())     //checking whether the file is open
    	{
 		newfile<<"3\n";
@@ -71,8 +67,6 @@ int main ()
 		newfile<<F<<"\n";
 		newfile<<P<<"\n";
 		newfile<<NA<<"\n";
-		newfile<<HM<<"\n";
-		newfile<<TC<<"\n";
 		newfile.close();		
 	  }
 	  else {cout<<"Unable to open file!\n";}

@@ -40,6 +40,8 @@
 #include <string>
 using namespace std;
 
+
+
 /******************************************************************************
  * Definitions & Declarations
  *****************************************************************************/
@@ -52,8 +54,8 @@ using namespace std;
 
 #define SX1272_SS 10
 
-//#define LORA_RESET_PIN 1
-#define LORA_RESET_PIN 3
+#define LORA_RESET_PIN 1
+//#define LORA_RESET_PIN 3
 #define LORA_SX1276_RESET_PIN 5
 
 //! MACROS //
@@ -1067,27 +1069,41 @@ public:
 	uint8_t getTemp();
 
 	//added by C.EWELL
+	// *******************************************************************************
 	uint8_t	getchip();
 	uint8_t	setdebug(uint8_t debug);
-	uint8_t success(int success);
+	uint8_t success(int success); //Print messages depending on the detected LoRa chip
 	uint8_t setupLORA();
 	uint8_t getLoraSetup();
 	uint8_t resetLora();
-	uint8_t writeLoraConfig(string d_v, string c_v, string b_v, string sf_v, string f_v, string p_v, string n_v);
-	uint8_t RxCalibration();
+	uint8_t writeLoraConfig(string d_v, string c_v, string b_v, string sf_v, string f_v, string p_v, string n_v, string h_v, string t_v);
+	uint8_t RxCalibration(); //Calibrates for the RSSI
+	uint8_t setupFreq();
+	uint8_t debug_registers(); // Prints the registers
+	
 	uint8_t _debug;
+	uint8_t _current=27;
 	int temp_cal = 18;
+
 	bool _check_for_change;
 	bool _change_node;
+	bool _startup = true; //For the startup reset
+
+	//These are for the lora config file
+	string lora_filepath = "/usr/local/LoRa Configuration/lora_config.txt";
 	string change_value;
   	string debug_value;
 	string codingRate_value;
 	string bandwidth_value;
 	string spreadingfactor_value;
 	string frequency_value;
+	string frequency;
+	string channel;
 	string power_value;
 	string node_value;
-
+	string header_value;
+	string temperature_value;
+	// ********************************************************************
 
 	/// Variables /////////////////////////////////////////////////////////////
 

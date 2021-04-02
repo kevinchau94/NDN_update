@@ -132,13 +132,14 @@ void
 LoRaFactory::setup(){
 
   // Power ON the module
-  e = sx1272.ON();
-
+  //e = sx1272.ON();
+  sx1272.getLoraSetup();
+  //e = sx1272.setupLORA();
   
   // Operating parameters affected by LoRaParameters function
   // Set Operating Parameters Coding Rate CR, Bandwidth BW, and Spreading Factor SF
   // Detect if there are new oprating parameter values, else use default
-  e = sx1272.setupLORA();
+  
  
   /*
   e = sx1272.setCR(CR_7);
