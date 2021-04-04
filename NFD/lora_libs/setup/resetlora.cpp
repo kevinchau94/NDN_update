@@ -55,7 +55,7 @@ int main ()
 		myfile.close();
 	}
   	else {
-		  cout << "Error: Unable to open file. Stop the program!";
+		  cout << "Error: Unable to open file. Please check resetlora.cpp in NFD/lora_libs/setup. Stop the program!";
 		  return 0;
 	}
 
@@ -75,7 +75,7 @@ int main ()
 		newfile<<TC<<"\n";
 		newfile.close();		
 	  }
-	  else {cout<<"Unable to open file!\n";}
+	  else {cout<<"Error: Unable to open file. Please check resetlora.cpp in NFD/lora_libs/setup. Stop the program!\n";}
 
   return 0;
 }
