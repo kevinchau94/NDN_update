@@ -110,7 +110,7 @@ int main () {
 		}
 	myfile.close();
 	}
-	else cout << "\nError: Unable to open file. Stopping the program!\n";
+	else cout << "\nError: Unable to open file. Please check getLoraSetup.cpp in NFD/lora_libs/setup. Stopping the program!\n";
   
 
   return 0;
