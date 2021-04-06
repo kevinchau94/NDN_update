@@ -35,6 +35,9 @@ Install the dependencies first:
 ```
 sudo apt-get install build-essential pkg-config libboost-all-dev \
                      libsqlite3-dev libssl-dev libpcap-dev
+                     
+sudo apt-get install doxygen graphviz python-sphinx
+
 ```
 
 Download the git files:
