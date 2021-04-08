@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2018 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,14 +19,14 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_SECURITY_VALIDATOR_NULL_HPP
-#define NDN_SECURITY_VALIDATOR_NULL_HPP
+#ifndef NDN_CXX_SECURITY_VALIDATOR_NULL_HPP
+#define NDN_CXX_SECURITY_VALIDATOR_NULL_HPP
 
-#include "ndn-cxx/security/v2/validator.hpp"
+#include "ndn-cxx/security/validator.hpp"
 
 namespace ndn {
 namespace security {
-namespace v2 {
+inline namespace v2 {
 
 /**
  * @brief Validator with "accept-all" policy and offline certificate fetcher
@@ -37,15 +37,11 @@ public:
   ValidatorNull();
 };
 
-security::v2::Validator&
+Validator&
 getAcceptAllValidator();
 
-} // namespace v2
-
-using v2::ValidatorNull;
-using v2::getAcceptAllValidator;
-
+} // inline namespace v2
 } // namespace security
 } // namespace ndn
 
-#endif // NDN_SECURITY_VALIDATOR_NULL_HPP
+#endif // NDN_CXX_SECURITY_VALIDATOR_NULL_HPP

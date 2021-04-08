@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_SECURITY_TPM_IMPL_BACK_END_OSX_HPP
-#define NDN_SECURITY_TPM_IMPL_BACK_END_OSX_HPP
+#ifndef NDN_CXX_SECURITY_TPM_IMPL_BACK_END_OSX_HPP
+#define NDN_CXX_SECURITY_TPM_IMPL_BACK_END_OSX_HPP
 
 #include "ndn-cxx/security/tpm/back-end.hpp"
 
@@ -68,11 +68,14 @@ public: // management
 
 public: // crypto transformation
   /**
-   * @brief Sign @p buf with @p key using @p digestAlgorithm.
+   * @brief Sign @p bufs with @p key using @p digestAlgorithm.
    */
   static ConstBufferPtr
-  sign(const KeyRefOsx& key, DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t size);
+  sign(const KeyRefOsx& key, DigestAlgorithm digestAlgorithm, const InputBuffers& bufs);
 
+  /**
+   * @brief Decrypt @p cipherText with @p key.
+   */
   static ConstBufferPtr
   decrypt(const KeyRefOsx& key, const uint8_t* cipherText, size_t cipherSize);
 
@@ -110,4 +113,4 @@ private:
 } // namespace security
 } // namespace ndn
 
-#endif // NDN_SECURITY_TPM_IMPL_BACK_END_OSX_HPP
+#endif // NDN_CXX_SECURITY_TPM_IMPL_BACK_END_OSX_HPP

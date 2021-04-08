@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2018,  Regents of the University of California,
+ * Copyright (c) 2014-2020,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -23,89 +23,44 @@
  * ndn-tools, e.g., in COPYING.md file.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "test-common.hpp"
-#include <ndn-cxx/security/signature-sha256-with-rsa.hpp>
+#include "tests/test-common.hpp"
 
 namespace ndn {
 namespace tests {
 
-UnitTestTimeFixture::UnitTestTimeFixture()
-  : steadyClock(make_shared<time::UnitTestSteadyClock>())
-  , systemClock(make_shared<time::UnitTestSystemClock>())
-{
-  time::setCustomClocks(steadyClock, systemClock);
-}
-
-UnitTestTimeFixture::~UnitTestTimeFixture()
-{
-  time::setCustomClocks(nullptr, nullptr);
-}
-
-void
-UnitTestTimeFixture::advanceClocks(boost::asio::io_service& io,
-                                   time::nanoseconds tick, size_t nTicks)
-{
-  this->advanceClocks(io, tick, tick * nTicks);
-}
-
-void
-UnitTestTimeFixture::advanceClocks(boost::asio::io_service& io,
-                                   time::nanoseconds tick, time::nanoseconds total)
-{
-  BOOST_ASSERT(tick > time::nanoseconds::zero());
-  BOOST_ASSERT(total >= time::nanoseconds::zero());
-
-  time::nanoseconds remaining = total;
-  while (remaining > time::nanoseconds::zero()) {
-    if (remaining >= tick) {
-      steadyClock->advance(tick);
-      systemClock->advance(tick);
-      remaining -= tick;
-    }
-    else {
-      steadyClock->advance(remaining);
-      systemClock->advance(remaining);
-      remaining = time::nanoseconds::zero();
-    }
-
-    if (io.stopped())
-      io.reset();
-    io.poll();
-  }
-}
-
 shared_ptr<Interest>
-makeInterest(const Name& name, bool canBePrefix, time::milliseconds lifetime, uint32_t nonce)
+makeInterest(const Name& name, bool canBePrefix, optional<time::milliseconds> lifetime,
+             optional<Interest::Nonce> nonce)
 {
-  auto interest = make_shared<Interest>(name, lifetime);
+  auto interest = std::make_shared<Interest>(name);
   interest->setCanBePrefix(canBePrefix);
-  if (nonce != 0) {
-    interest->setNonce(nonce);
+  if (lifetime) {
+    interest->setInterestLifetime(*lifetime);
   }
+  interest->setNonce(nonce);
   return interest;
 }
 
 shared_ptr<Data>
 makeData(const Name& name)
 {
-  auto data = make_shared<Data>(name);
+  auto data = std::make_shared<Data>(name);
   return signData(data);
 }
 
 Data&
 signData(Data& data)
 {
-  ndn::SignatureSha256WithRsa fakeSignature;
-  fakeSignature.setValue(ndn::encoding::makeEmptyBlock(tlv::SignatureValue));
-  data.setSignature(fakeSignature);
+  data.setSignatureInfo(SignatureInfo(tlv::NullSignature));
+  data.setSignatureValue(std::make_shared<Buffer>());
   data.wireEncode();
   return data;
 }
 
 lp::Nack
-makeNack(const Interest& interest, lp::NackReason reason)
+makeNack(Interest interest, lp::NackReason reason)
 {
-  lp::Nack nack(interest);
+  lp::Nack nack(std::move(interest));
   nack.setReason(reason);
   return nack;
 }

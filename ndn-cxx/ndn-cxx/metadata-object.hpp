@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -16,15 +16,17 @@
  * General Public License along with ndn-cxx, e.g., in COPYING.md file.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
+ * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
+ *
  * @author Chavoosh Ghasemi <chghasemi@cs.arizona.edu>
  */
 
-#ifndef NDN_METADATA_OBJECT_HPP
-#define NDN_METADATA_OBJECT_HPP
+#ifndef NDN_CXX_METADATA_OBJECT_HPP
+#define NDN_CXX_METADATA_OBJECT_HPP
 
 #include "ndn-cxx/data.hpp"
 #include "ndn-cxx/interest.hpp"
-#include "ndn-cxx/security/v2/key-chain.hpp"
+#include "ndn-cxx/security/key-chain.hpp"
 
 namespace ndn {
 
@@ -79,7 +81,7 @@ public:
   NDN_CXX_NODISCARD Data
   makeData(Name discoveryInterestName,
            KeyChain& keyChain,
-           const ndn::security::SigningInfo& si = KeyChain::getDefaultSigningInfo(),
+           const ndn::security::SigningInfo& si = security::SigningInfo(),
            optional<uint64_t> version = nullopt,
            time::milliseconds freshnessPeriod = 10_ms) const;
 
@@ -123,4 +125,4 @@ private:
 
 } // namespace ndn
 
-#endif // NDN_METADATA_OBJECT_HPP
+#endif // NDN_CXX_METADATA_OBJECT_HPP

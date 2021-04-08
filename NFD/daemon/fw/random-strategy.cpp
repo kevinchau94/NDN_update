@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Regents of the University of California,
+ * Copyright (c) 2014-2021,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -52,7 +52,7 @@ RandomStrategy::RandomStrategy(Forwarder& forwarder, const Name& name)
 const Name&
 RandomStrategy::getStrategyName()
 {
-  static Name strategyName("/localhost/nfd/strategy/random/%FD%01");
+  static const auto strategyName = Name("/localhost/nfd/strategy/random").appendVersion(1);
   return strategyName;
 }
 
@@ -61,24 +61,23 @@ RandomStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Interest
                                      const shared_ptr<pit::Entry>& pitEntry)
 {
   const fib::Entry& fibEntry = this->lookupFib(*pitEntry);
-  const Face& inFace = ingress.face;
   fib::NextHopList nhs;
 
   std::copy_if(fibEntry.getNextHops().begin(), fibEntry.getNextHops().end(), std::back_inserter(nhs),
-               [&] (const auto& nh) { return isNextHopEligible(inFace, interest, nh, pitEntry); });
+               [&] (const auto& nh) { return isNextHopEligible(ingress.face, interest, nh, pitEntry); });
 
   if (nhs.empty()) {
     NFD_LOG_DEBUG(interest << " from=" << ingress << " no nexthop");
 
     lp::NackHeader nackHeader;
     nackHeader.setReason(lp::NackReason::NO_ROUTE);
-    this->sendNack(pitEntry, ingress, nackHeader);
+    this->sendNack(pitEntry, ingress.face, nackHeader);
     this->rejectPendingInterest(pitEntry);
     return;
   }
 
   std::shuffle(nhs.begin(), nhs.end(), ndn::random::getRandomNumberEngine());
-  this->sendInterest(pitEntry, FaceEndpoint(nhs.front().getFace(), 0), interest);
+  this->sendInterest(pitEntry, nhs.front().getFace(), interest);
 }
 
 void

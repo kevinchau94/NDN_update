@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Regents of the University of California,
+ * Copyright (c) 2014-2020,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -26,7 +26,8 @@
 #include "tools/peek/ndnpoke/ndnpoke.hpp"
 
 #include "tests/test-common.hpp"
-#include "tests/identity-management-fixture.hpp"
+#include "tests/io-fixture.hpp"
+#include "tests/key-chain-fixture.hpp"
 
 #include <ndn-cxx/util/dummy-client-face.hpp>
 
@@ -37,7 +38,7 @@ namespace tests {
 using namespace ndn::tests;
 
 template<bool WANT_PREFIX_REG_REPLY = true>
-class NdnPokeFixture : public IdentityManagementTimeFixture
+class NdnPokeFixture : public IoFixture, public KeyChainFixture
 {
 protected:
   NdnPokeFixture()
@@ -60,8 +61,7 @@ protected:
   }
 
 protected:
-  boost::asio::io_service io;
-  ndn::util::DummyClientFace face{io, m_keyChain, {true, WANT_PREFIX_REG_REPLY}};
+  ndn::util::DummyClientFace face{m_io, m_keyChain, {true, WANT_PREFIX_REG_REPLY}};
   std::stringstream payload{"Hello, world!\n"};
   unique_ptr<NdnPoke> poke;
 };
@@ -74,14 +74,14 @@ BOOST_AUTO_TEST_CASE(Basic)
   initialize();
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   // Check for prefix registration
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.sentInterests.front().getName().getPrefix(4), "/localhost/nfd/rib/register");
 
   face.receive(*makeInterest("/poke/test"));
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::DATA_SENT);
   BOOST_REQUIRE_EQUAL(face.sentData.size(), 1);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(Basic)
   BOOST_CHECK_EQUAL(face.sentData.back().getFreshnessPeriod(), 0_ms);
   BOOST_CHECK_EQUAL(face.sentData.back().getContentType(), tlv::ContentType_Blob);
   BOOST_CHECK_EQUAL(face.sentData.back().getContent(), "150E48656C6C6F2C20776F726C64210A"_block);
-  BOOST_CHECK_EQUAL(face.sentData.back().getSignature().getType(), tlv::SignatureSha256WithEcdsa);
+  BOOST_CHECK_EQUAL(face.sentData.back().getSignatureType(), tlv::SignatureSha256WithEcdsa);
 
   // Check for prefix unregistration
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), 2); // One for registration, one for unregistration
@@ -102,16 +102,16 @@ BOOST_AUTO_TEST_CASE(NoMatch)
   initialize();
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   face.receive(*makeInterest("/poke/test/foo"));
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::UNKNOWN);
   BOOST_CHECK_EQUAL(face.sentData.size(), 0);
 
   face.receive(*makeInterest("/poke/test"));
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::DATA_SENT);
   BOOST_REQUIRE_EQUAL(face.sentData.size(), 1);
@@ -125,17 +125,17 @@ BOOST_AUTO_TEST_CASE(FreshnessPeriod)
   initialize(options);
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   face.receive(*makeInterest("/poke/test"));
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::DATA_SENT);
   BOOST_REQUIRE_EQUAL(face.sentData.size(), 1);
   BOOST_CHECK_EQUAL(face.sentData.back().getName(), "/poke/test");
   BOOST_CHECK(!face.sentData.back().getFinalBlock());
   BOOST_CHECK_EQUAL(face.sentData.back().getFreshnessPeriod(), 1_s);
-  BOOST_CHECK_EQUAL(face.sentData.back().getSignature().getType(), tlv::SignatureSha256WithEcdsa);
+  BOOST_CHECK_EQUAL(face.sentData.back().getSignatureType(), tlv::SignatureSha256WithEcdsa);
 }
 
 BOOST_AUTO_TEST_CASE(FinalBlockId)
@@ -146,10 +146,10 @@ BOOST_AUTO_TEST_CASE(FinalBlockId)
   initialize(options);
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   face.receive(*makeInterest(options.name));
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::DATA_SENT);
   BOOST_REQUIRE_EQUAL(face.sentData.size(), 1);
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(FinalBlockId)
   BOOST_REQUIRE(face.sentData.back().getFinalBlock());
   BOOST_CHECK_EQUAL(*(face.sentData.back().getFinalBlock()), name::Component("123"));
   BOOST_CHECK_EQUAL(face.sentData.back().getFreshnessPeriod(), 0_ms);
-  BOOST_CHECK_EQUAL(face.sentData.back().getSignature().getType(), tlv::SignatureSha256WithEcdsa);
+  BOOST_CHECK_EQUAL(face.sentData.back().getSignatureType(), tlv::SignatureSha256WithEcdsa);
 }
 
 BOOST_AUTO_TEST_CASE(DigestSha256)
@@ -167,17 +167,17 @@ BOOST_AUTO_TEST_CASE(DigestSha256)
   initialize(options);
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   face.receive(*makeInterest("/poke/test"));
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::DATA_SENT);
   BOOST_REQUIRE_EQUAL(face.sentData.size(), 1);
   BOOST_CHECK_EQUAL(face.sentData.back().getName(), "/poke/test");
   BOOST_CHECK(!face.sentData.back().getFinalBlock());
   BOOST_CHECK_EQUAL(face.sentData.back().getFreshnessPeriod(), 0_ms);
-  BOOST_CHECK_EQUAL(face.sentData.back().getSignature().getType(), tlv::DigestSha256);
+  BOOST_CHECK_EQUAL(face.sentData.back().getSignatureType(), tlv::DigestSha256);
 }
 
 BOOST_AUTO_TEST_CASE(Unsolicited)
@@ -187,14 +187,14 @@ BOOST_AUTO_TEST_CASE(Unsolicited)
   initialize(options);
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::DATA_SENT);
   BOOST_REQUIRE_EQUAL(face.sentData.size(), 1);
   BOOST_CHECK_EQUAL(face.sentData.back().getName(), "/poke/test");
   BOOST_CHECK(!face.sentData.back().getFinalBlock());
   BOOST_CHECK_EQUAL(face.sentData.back().getFreshnessPeriod(), 0_ms);
-  BOOST_CHECK_EQUAL(face.sentData.back().getSignature().getType(), tlv::SignatureSha256WithEcdsa);
+  BOOST_CHECK_EQUAL(face.sentData.back().getSignatureType(), tlv::SignatureSha256WithEcdsa);
 }
 
 BOOST_AUTO_TEST_CASE(Timeout)
@@ -204,13 +204,13 @@ BOOST_AUTO_TEST_CASE(Timeout)
   initialize(options);
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   // Check for prefix registration
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.sentInterests.front().getName().getPrefix(4), "/localhost/nfd/rib/register");
 
-  this->advanceClocks(io, 1_s, 4);
+  this->advanceClocks(1_s, 4);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::TIMEOUT);
   BOOST_CHECK_EQUAL(face.sentData.size(), 0);
@@ -225,13 +225,13 @@ BOOST_FIXTURE_TEST_CASE(PrefixRegTimeout, NdnPokeFixture<false>)
   initialize();
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   // Check for prefix registration
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.sentInterests.front().getName().getPrefix(4), "/localhost/nfd/rib/register");
 
-  this->advanceClocks(io, 1_s, 10);
+  this->advanceClocks(1_s, 10);
 
   BOOST_CHECK(poke->getResult() == NdnPoke::Result::PREFIX_REG_FAIL);
   BOOST_CHECK_EQUAL(face.sentData.size(), 0);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(OversizedPacket)
   initialize();
 
   poke->start();
-  this->advanceClocks(io, 1_ms, 10);
+  this->advanceClocks(1_ms, 10);
 
   face.receive(*makeInterest("/poke/test"));
   BOOST_CHECK_THROW(face.processEvents(), Face::OversizedPacketError);

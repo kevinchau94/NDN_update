@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Arizona Board of Regents.
+ * Copyright (c) 2014-2020,  Arizona Board of Regents.
  *
  * This file is part of ndn-tools (Named Data Networking Essential Tools).
  * See AUTHORS.md for complete list of ndn-tools authors and contributors.
@@ -20,10 +20,16 @@
 #include "tools/peek/ndnpeek/ndnpeek.hpp"
 
 #include "tests/test-common.hpp"
+#include "tests/io-fixture.hpp"
 
 #include <ndn-cxx/util/dummy-client-face.hpp>
 
 #include <boost/mpl/vector.hpp>
+#if BOOST_VERSION >= 105900
+#include <boost/test/tools/output_test_stream.hpp>
+#else
+#include <boost/test/output_test_stream.hpp>
+#endif
 
 namespace ndn {
 namespace peek {
@@ -58,7 +64,7 @@ makeDefaultOptions()
   return opt;
 }
 
-class NdnPeekFixture : public UnitTestTimeFixture
+class NdnPeekFixture : public IoFixture
 {
 protected:
   void
@@ -68,8 +74,7 @@ protected:
   }
 
 protected:
-  boost::asio::io_service io;
-  ndn::util::DummyClientFace face{io};
+  ndn::util::DummyClientFace face{m_io};
   output_test_stream output;
   unique_ptr<NdnPeek> peek;
 };
@@ -144,7 +149,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Default, OutputCheck, OutputChecks)
   {
     CoutRedirector redir(output);
     peek->start();
-    this->advanceClocks(io, 25_ms, 4);
+    this->advanceClocks(25_ms, 4);
     face.receive(*data);
   }
 
@@ -176,7 +181,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NonDefault, OutputCheck, OutputChecks)
   {
     CoutRedirector redir(output);
     peek->start();
-    this->advanceClocks(io, 25_ms, 4);
+    this->advanceClocks(25_ms, 4);
     face.receive(*data);
   }
 
@@ -200,7 +205,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ReceiveNackWithReason, OutputCheck, OutputChecks)
   {
     CoutRedirector redir(output);
     peek->start();
-    this->advanceClocks(io, 25_ms, 4);
+    this->advanceClocks(25_ms, 4);
     nack = makeNack(face.sentInterests.at(0), lp::NackReason::NO_ROUTE);
     face.receive(nack);
   }
@@ -219,7 +224,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ReceiveNackWithoutReason, OutputCheck, OutputCheck
   {
     CoutRedirector redir(output);
     peek->start();
-    this->advanceClocks(io, 25_ms, 4);
+    this->advanceClocks(25_ms, 4);
     nack = makeNack(face.sentInterests.at(0), lp::NackReason::NONE);
     face.receive(nack);
   }
@@ -236,7 +241,7 @@ BOOST_AUTO_TEST_CASE(ApplicationParameters)
   initialize(options);
 
   peek->start();
-  this->advanceClocks(io, 25_ms, 4);
+  this->advanceClocks(25_ms, 4);
 
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.sentInterests.back().getCanBePrefix(), false);
@@ -257,12 +262,12 @@ BOOST_AUTO_TEST_CASE(NoTimeout)
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 0);
 
   peek->start();
-  this->advanceClocks(io, 100_ms, 9);
+  this->advanceClocks(100_ms, 9);
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.getNPendingInterests(), 1);
   BOOST_CHECK(peek->getResult() == NdnPeek::Result::UNKNOWN);
 
-  this->advanceClocks(io, 100_ms, 2);
+  this->advanceClocks(100_ms, 2);
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.getNPendingInterests(), 0);
   BOOST_CHECK(peek->getResult() == NdnPeek::Result::TIMEOUT);
@@ -278,7 +283,7 @@ BOOST_AUTO_TEST_CASE(TimeoutLessThanLifetime)
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 0);
 
   peek->start();
-  this->advanceClocks(io, 25_ms, 6);
+  this->advanceClocks(25_ms, 6);
 
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.getNPendingInterests(), 0);
@@ -295,7 +300,7 @@ BOOST_AUTO_TEST_CASE(TimeoutGreaterThanLifetime)
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 0);
 
   peek->start();
-  this->advanceClocks(io, 25_ms, 4);
+  this->advanceClocks(25_ms, 4);
 
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 1);
   BOOST_CHECK_EQUAL(face.getNPendingInterests(), 0);
@@ -309,7 +314,7 @@ BOOST_AUTO_TEST_CASE(OversizedPacket)
   initialize(options);
 
   peek->start();
-  BOOST_CHECK_THROW(this->advanceClocks(io, 1_ms, 10), Face::OversizedPacketError);
+  BOOST_CHECK_THROW(this->advanceClocks(1_ms, 10), Face::OversizedPacketError);
 
   BOOST_CHECK_EQUAL(face.sentInterests.size(), 0);
 }

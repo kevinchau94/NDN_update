@@ -1,12 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2018 Regents of the University of California,
- *                         Arizona Board of Regents,
- *                         Colorado State University,
- *                         University Pierre & Marie Curie, Sorbonne University,
- *                         Washington University in St. Louis,
- *                         Beijing Institute of Technology,
- *                         The University of Memphis.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -25,12 +19,12 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_UTIL_NOTIFICATION_STREAM_HPP
-#define NDN_UTIL_NOTIFICATION_STREAM_HPP
+#ifndef NDN_CXX_UTIL_NOTIFICATION_STREAM_HPP
+#define NDN_CXX_UTIL_NOTIFICATION_STREAM_HPP
 
 #include "ndn-cxx/face.hpp"
 #include "ndn-cxx/name.hpp"
-#include "ndn-cxx/security/v2/key-chain.hpp"
+#include "ndn-cxx/security/key-chain.hpp"
 #include "ndn-cxx/util/concepts.hpp"
 
 namespace ndn {
@@ -82,4 +76,4 @@ private:
 } // namespace util
 } // namespace ndn
 
-#endif // NDN_UTIL_NOTIFICATION_STREAM_HPP
+#endif // NDN_CXX_UTIL_NOTIFICATION_STREAM_HPP

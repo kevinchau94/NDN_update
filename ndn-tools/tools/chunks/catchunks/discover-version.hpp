@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016-2019, Regents of the University of California,
+ * Copyright (c) 2016-2021, Regents of the University of California,
  *                          Colorado State University,
  *                          University Pierre & Marie Curie, Sorbonne University.
  *
@@ -29,8 +29,9 @@
 #ifndef NDN_TOOLS_CHUNKS_CATCHUNKS_DISCOVER_VERSION_HPP
 #define NDN_TOOLS_CHUNKS_CATCHUNKS_DISCOVER_VERSION_HPP
 
-#include "core/common.hpp"
 #include "options.hpp"
+
+#include <ndn-cxx/util/signal.hpp>
 
 namespace ndn {
 namespace chunks {
@@ -38,33 +39,26 @@ namespace chunks {
 class DataFetcher;
 
 /**
- * @brief Base class of services for discovering the latest Data version
+ * @brief Service for discovering the latest Data version.
  *
  * DiscoverVersion's user is notified once after identifying the latest retrievable version or
  * on failure to find any Data version.
  */
-class DiscoverVersion : virtual protected Options, noncopyable
+class DiscoverVersion
 {
-public: // signals
+public:
+  DiscoverVersion(Face& face, const Name& prefix, const Options& options);
+
   /**
    * @brief Signal emitted when the versioned name of Data is found.
    */
-  signal::Signal<DiscoverVersion, Name> onDiscoverySuccess;
+  util::Signal<DiscoverVersion, Name> onDiscoverySuccess;
 
   /**
    * @brief Signal emitted when a failure occurs.
    */
-  signal::Signal<DiscoverVersion, std::string> onDiscoveryFailure;
+  util::Signal<DiscoverVersion, std::string> onDiscoveryFailure;
 
-public:
-  /**
-   * @brief create a DiscoverVersion service
-   */
-  DiscoverVersion(const Name& prefix, Face& face, const Options& options);
-
-  /**
-   * @brief identify the latest Data version published.
-   */
   void
   run();
 
@@ -73,8 +67,9 @@ private:
   handleData(const Interest& interest, const Data& data);
 
 private:
-  const Name m_prefix;
   Face& m_face;
+  const Name m_prefix;
+  const Options& m_options;
   shared_ptr<DataFetcher> m_fetcher;
 };
 

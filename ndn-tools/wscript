@@ -1,11 +1,11 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
-VERSION = '0.6.4'
+from waflib import Context, Logs, Utils
+import os, subprocess
+
+VERSION = '0.7.1'
 APPNAME = 'ndn-tools'
 GIT_TAG_PREFIX = 'ndn-tools-'
-
-from waflib import Utils, Context
-import os, subprocess
 
 def options(opt):
     opt.load(['compiler_cxx', 'gnu_dirs'])
@@ -14,22 +14,21 @@ def options(opt):
               'sphinx_build'],
              tooldir=['.waf-tools'])
 
-    opt_group = opt.add_option_group('Tools Options')
-
-    opt_group.add_option('--with-tests', action='store_true', default=False,
-                         help='Build unit tests')
+    optgrp = opt.add_option_group('Tools Options')
+    optgrp.add_option('--with-tests', action='store_true', default=False,
+                      help='Build unit tests')
 
     opt.recurse('tools')
 
 def configure(conf):
     conf.load(['compiler_cxx', 'gnu_dirs',
-               'default-compiler-flags', 'boost', 'sphinx_build'])
+               'default-compiler-flags', 'boost',
+               'sphinx_build'])
 
     conf.env.WITH_TESTS = conf.options.with_tests
 
-    if 'PKG_CONFIG_PATH' not in os.environ:
-        os.environ['PKG_CONFIG_PATH'] = Utils.subst_vars('${LIBDIR}/pkgconfig', conf.env)
-    conf.check_cfg(package='libndn-cxx', args=['--cflags', '--libs'], uselib_store='NDN_CXX')
+    conf.check_cfg(package='libndn-cxx', args=['--cflags', '--libs'], uselib_store='NDN_CXX',
+                   pkg_config_path=os.environ.get('PKG_CONFIG_PATH', '%s/pkgconfig' % conf.env.LIBDIR))
 
     boost_libs = ['system', 'program_options', 'filesystem']
     if conf.env.WITH_TESTS:
@@ -38,9 +37,13 @@ def configure(conf):
 
     conf.check_boost(lib=boost_libs, mt=True)
     if conf.env.BOOST_VERSION_NUMBER < 105800:
-        conf.fatal('Minimum required Boost version is 1.58.0\n'
-                   'Please upgrade your distribution or manually install a newer version of Boost'
-                   ' (https://redmine.named-data.net/projects/nfd/wiki/Boost_FAQ)')
+        conf.fatal('The minimum supported version of Boost is 1.65.1.\n'
+                   'Please upgrade your distribution or manually install a newer version of Boost.\n'
+                   'For more information, see https://redmine.named-data.net/projects/nfd/wiki/Boost')
+    elif conf.env.BOOST_VERSION_NUMBER < 106501:
+        Logs.warn('WARNING: Using a version of Boost older than 1.65.1 is not officially supported and may not work.\n'
+                  'If you encounter any problems, please upgrade your distribution or manually install a newer version of Boost.\n'
+                  'For more information, see https://redmine.named-data.net/projects/nfd/wiki/Boost')
 
     conf.recurse('tools')
 
@@ -111,7 +114,7 @@ def version(ctx):
     except (OSError, subprocess.CalledProcessError):
         pass
 
-    versionFile = ctx.path.find_node('VERSION')
+    versionFile = ctx.path.find_node('VERSION.info')
     if not gotVersionFromGit and versionFile is not None:
         try:
             Context.g_module.VERSION = versionFile.read()
@@ -128,7 +131,7 @@ def version(ctx):
         except EnvironmentError as e:
             Logs.warn('%s exists but is not readable (%s)' % (versionFile, e.strerror))
     else:
-        versionFile = ctx.path.make_node('VERSION')
+        versionFile = ctx.path.make_node('VERSION.info')
 
     try:
         versionFile.write(Context.g_module.VERSION)

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Regents of the University of California,
+ * Copyright (c) 2014-2021,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -24,6 +24,7 @@
  */
 
 #include "algorithm.hpp"
+#include "scope-prefix.hpp"
 
 namespace nfd {
 namespace fw {
@@ -50,32 +51,8 @@ wouldViolateScope(const Face& inFace, const Interest& interest, const Face& outF
   return false;
 }
 
-bool
-canForwardToLegacy(const pit::Entry& pitEntry, const Face& face)
-{
-  time::steady_clock::TimePoint now = time::steady_clock::now();
-
-  bool hasUnexpiredOutRecord = std::any_of(pitEntry.out_begin(), pitEntry.out_end(),
-    [&face, &now] (const pit::OutRecord& outRecord) {
-      return &outRecord.getFace() == &face && outRecord.getExpiry() >= now;
-    });
-  if (hasUnexpiredOutRecord) {
-    return false;
-  }
-
-  bool hasUnexpiredOtherInRecord = std::any_of(pitEntry.in_begin(), pitEntry.in_end(),
-    [&face, &now] (const pit::InRecord& inRecord) {
-      return &inRecord.getFace() != &face && inRecord.getExpiry() >= now;
-    });
-  if (!hasUnexpiredOtherInRecord) {
-    return false;
-  }
-
-  return true;
-}
-
 int
-findDuplicateNonce(const pit::Entry& pitEntry, uint32_t nonce, const Face& face)
+findDuplicateNonce(const pit::Entry& pitEntry, Interest::Nonce nonce, const Face& face)
 {
   int dnw = DUPLICATE_NONCE_NONE;
 

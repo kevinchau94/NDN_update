@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Regents of the University of California,
+ * Copyright (c) 2014-2021,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -29,6 +29,10 @@
 #include "ndnpoke.hpp"
 #include "core/version.hpp"
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 namespace ndn {
 namespace peek {
 
@@ -49,7 +53,6 @@ main(int argc, char* argv[])
   std::string progName(argv[0]);
   PokeOptions options;
   std::string signingStr;
-  bool wantDigestSha256 = false;
 
   po::options_description genericOptDesc("Generic options");
   genericOptDesc.add_options()
@@ -63,11 +66,11 @@ main(int argc, char* argv[])
 
   po::options_description dataOptDesc("Data construction");
   dataOptDesc.add_options()
-    ("final,F",     po::bool_switch(&options.wantFinalBlockId),
-                    "set FinalBlockId to the last component of the Data name")
-    ("freshness,x", po::value<time::milliseconds::rep>()->default_value(options.freshnessPeriod.count()),
-                    "set FreshnessPeriod, in milliseconds")
-    ("signing-info,S",  po::value<std::string>(&signingStr), "see 'man ndnpoke' for usage")
+    ("freshness,f",    po::value<time::milliseconds::rep>()->default_value(options.freshnessPeriod.count()),
+                       "set FreshnessPeriod, in milliseconds")
+    ("final,F",        po::bool_switch(&options.wantFinalBlockId),
+                       "set FinalBlockId to the last component of the Data name")
+    ("signing-info,S", po::value<std::string>(&signingStr), "see 'man ndnpoke' for usage")
   ;
 
   po::options_description visibleOptDesc;
@@ -77,15 +80,8 @@ main(int argc, char* argv[])
   hiddenOptDesc.add_options()
     ("name", po::value<std::string>(), "Data name");
 
-  po::options_description deprecatedOptDesc;
-  deprecatedOptDesc.add_options()
-    ("force,f",     po::bool_switch())
-    ("identity,i",  po::value<std::string>())
-    ("digest,D",    po::bool_switch(&wantDigestSha256))
-  ;
-
   po::options_description optDesc;
-  optDesc.add(visibleOptDesc).add(hiddenOptDesc).add(deprecatedOptDesc);
+  optDesc.add(visibleOptDesc).add(hiddenOptDesc);
 
   po::positional_options_description optPos;
   optPos.add("name", -1);
@@ -98,16 +94,6 @@ main(int argc, char* argv[])
   catch (const po::error& e) {
     std::cerr << "ERROR: " << e.what() << std::endl;
     return 2;
-  }
-
-  if (vm["force"].as<bool>()) {
-    std::cerr << "WARNING: option '-f/--force' is deprecated and will be removed "
-                 "in the near future. Use '-u/--unsolicited' instead." << std::endl;
-    options.wantUnsolicited = true;
-  }
-  if (wantDigestSha256 || vm.count("identity") > 0) {
-    std::cerr << "WARNING: options '-i/--identity' and '-D/--digest' are deprecated and will be "
-                 "removed in the near future. Use '-S/--signing-info' instead." << std::endl;
   }
 
   if (vm.count("help") > 0) {
@@ -143,24 +129,6 @@ main(int argc, char* argv[])
   if (options.freshnessPeriod < 0_ms) {
     std::cerr << "ERROR: freshness cannot be negative" << std::endl;
     return 2;
-  }
-
-  if (vm.count("identity") > 0) {
-    if (wantDigestSha256) {
-      std::cerr << "ERROR: conflicting '--digest' and '--identity' options specified" << std::endl;
-      return 2;
-    }
-    try {
-      options.signingInfo.setSigningIdentity(vm["identity"].as<std::string>());
-    }
-    catch (const Name::Error& e) {
-      std::cerr << "ERROR: invalid identity name: " << e.what() << std::endl;
-      return 2;
-    }
-  }
-
-  if (wantDigestSha256) {
-    options.signingInfo.setSha256Signing();
   }
 
   try {

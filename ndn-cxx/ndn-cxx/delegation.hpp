@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,15 +19,15 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_DELEGATION_HPP
-#define NDN_DELEGATION_HPP
+#ifndef NDN_CXX_DELEGATION_HPP
+#define NDN_CXX_DELEGATION_HPP
 
 #include "ndn-cxx/name.hpp"
 
 namespace ndn {
 
-/** \brief Represents a Delegation.
- *  \sa https://named-data.net/doc/NDN-packet-spec/current/link.html
+/** \brief Represents a %Delegation.
+ *  \sa https://named-data.net/doc/NDN-packet-spec/0.3/link.html
  */
 class Delegation
 {
@@ -86,4 +86,4 @@ public:
 
 } // namespace ndn
 
-#endif // NDN_DELEGATION_HPP
+#endif // NDN_CXX_DELEGATION_HPP

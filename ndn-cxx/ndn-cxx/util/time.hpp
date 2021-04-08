@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2018 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_UTIL_TIME_HPP
-#define NDN_UTIL_TIME_HPP
+#ifndef NDN_CXX_UTIL_TIME_HPP
+#define NDN_CXX_UTIL_TIME_HPP
 
 #include "ndn-cxx/detail/common.hpp"
 
@@ -302,7 +302,7 @@ fromIsoString(const std::string& isoString);
  * \param format desired output format (default: `%Y-%m-%d %H:%M:%S`)
  * \param locale desired locale (default: "C" locale)
  *
- * \sa https://www.boost.org/doc/libs/1_58_0/doc/html/date_time/date_time_io.html#date_time.format_flags
+ * \sa https://www.boost.org/doc/libs/1_65_1/doc/html/date_time/date_time_io.html#date_time.format_flags
  *     describes possible formatting flags
  **/
 std::string
@@ -320,7 +320,7 @@ toString(const system_clock::TimePoint& timePoint,
  * \param format input output format (default: `%Y-%m-%d %H:%M:%S`)
  * \param locale input locale (default: "C" locale)
  *
- * \sa https://www.boost.org/doc/libs/1_58_0/doc/html/date_time/date_time_io.html#date_time.format_flags
+ * \sa https://www.boost.org/doc/libs/1_65_1/doc/html/date_time/date_time_io.html#date_time.format_flags
  *     describes possible formatting flags
  */
 system_clock::TimePoint
@@ -354,4 +354,4 @@ extern template struct clock_string<ndn::time::steady_clock, char>;
 } // namespace chrono
 } // namespace boost
 
-#endif // NDN_UTIL_TIME_HPP
+#endif // NDN_CXX_UTIL_TIME_HPP

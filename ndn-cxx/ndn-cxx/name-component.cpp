@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -30,6 +30,8 @@
 #include <cstring>
 #include <sstream>
 
+#include <boost/logic/tribool.hpp>
+
 namespace ndn {
 namespace name {
 
@@ -40,7 +42,7 @@ BOOST_CONCEPT_ASSERT((WireDecodable<Component>));
 static_assert(std::is_base_of<tlv::Error, Component::Error>::value,
               "name::Component::Error must inherit from tlv::Error");
 
-static Convention g_conventionEncoding = Convention::MARKER;
+static Convention g_conventionEncoding = Convention::TYPED;
 static Convention g_conventionDecoding = Convention::EITHER;
 
 Convention
@@ -84,6 +86,34 @@ static bool
 canDecodeTypedConvention()
 {
   return (to_underlying(g_conventionDecoding) & to_underlying(Convention::TYPED)) != 0;
+}
+
+static bool
+wantAltUri(UriFormat format)
+{
+  static const auto wantAltEnv = []() -> boost::tribool {
+    const char* env = std::getenv("NDN_NAME_ALT_URI");
+    if (env == nullptr)
+      return boost::indeterminate;
+    else if (env[0] == '0')
+      return false;
+    else if (env[0] == '1')
+      return true;
+    else
+      return boost::indeterminate;
+  }();
+
+  if (format == UriFormat::ENV_OR_CANONICAL) {
+    static const bool wantAlt = boost::indeterminate(wantAltEnv) ? false : bool(wantAltEnv);
+    return wantAlt;
+  }
+  else if (format == UriFormat::ENV_OR_ALTERNATE) {
+    static const bool wantAlt = boost::indeterminate(wantAltEnv) ? true : bool(wantAltEnv);
+    return wantAlt;
+  }
+  else {
+    return format == UriFormat::ALTERNATE;
+  }
 }
 
 void
@@ -169,16 +199,21 @@ Component::fromEscapedString(const std::string& input)
 }
 
 void
-Component::toUri(std::ostream& os) const
+Component::toUri(std::ostream& os, UriFormat format) const
 {
-  detail::getComponentTypeTable().get(type()).writeUri(os, *this);
+  if (wantAltUri(format)) {
+    detail::getComponentTypeTable().get(type()).writeUri(os, *this);
+  }
+  else {
+    detail::ComponentType().writeUri(os, *this);
+  }
 }
 
 std::string
-Component::toUri() const
+Component::toUri(UriFormat format) const
 {
   std::ostringstream os;
-  toUri(os);
+  toUri(os, format);
   return os.str();
 }
 
@@ -439,8 +474,7 @@ Component::equals(const Component& other) const
 {
   return type() == other.type() &&
          value_size() == other.value_size() &&
-         (empty() || // needed with Apple clang < 9.0.0 due to libc++ bug
-          std::equal(value_begin(), value_end(), other.value_begin()));
+         std::equal(value_begin(), value_end(), other.value_begin());
 }
 
 int

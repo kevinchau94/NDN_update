@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2018 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,11 +19,11 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_SECURITY_PIB_PIB_IMPL_HPP
-#define NDN_SECURITY_PIB_PIB_IMPL_HPP
+#ifndef NDN_CXX_SECURITY_PIB_PIB_IMPL_HPP
+#define NDN_CXX_SECURITY_PIB_PIB_IMPL_HPP
 
 #include "ndn-cxx/security/pib/pib.hpp"
-#include "ndn-cxx/security/v2/certificate.hpp"
+#include "ndn-cxx/security/certificate.hpp"
 
 #include <set>
 
@@ -118,9 +118,9 @@ public: // Identity management
   /**
    * @brief Set an identity with name @p identityName as the default identity.
    *
-   * If @p identityName identity does not exist, it will be created.
-   *
    * @param identityName The name for the default identity.
+   * @throw Error If @p identityName identity does not exist.
+   *
    */
   virtual void
   setDefaultIdentity(const Name& identityName) = 0;
@@ -226,7 +226,7 @@ public: // Certificate Management
    * @param certificate The certificate to add.
    */
   virtual void
-  addCertificate(const v2::Certificate& certificate) = 0;
+  addCertificate(const Certificate& certificate) = 0;
 
   /**
    * @brief Remove a certificate with name @p certName.
@@ -245,7 +245,7 @@ public: // Certificate Management
    * @return the certificate.
    * @throw Pib::Error the certificate does not exist.
    */
-  virtual v2::Certificate
+  virtual Certificate
   getCertificate(const Name& certName) const = 0;
 
   /**
@@ -272,7 +272,7 @@ public: // Certificate Management
    *
    * @throw Pib::Error the default certificate does not exist.
    */
-  virtual v2::Certificate
+  virtual Certificate
   getDefaultCertificateOfKey(const Name& keyName) const = 0;
 };
 
@@ -280,4 +280,4 @@ public: // Certificate Management
 } // namespace security
 } // namespace ndn
 
-#endif // NDN_SECURITY_PIB_PIB_IMPL_HPP
+#endif // NDN_CXX_SECURITY_PIB_PIB_IMPL_HPP

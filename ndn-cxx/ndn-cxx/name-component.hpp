@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_NAME_COMPONENT_HPP
-#define NDN_NAME_COMPONENT_HPP
+#ifndef NDN_CXX_NAME_COMPONENT_HPP
+#define NDN_CXX_NAME_COMPONENT_HPP
 
 #include "ndn-cxx/detail/common.hpp"
 #include "ndn-cxx/encoding/block.hpp"
@@ -30,16 +30,33 @@
 namespace ndn {
 namespace name {
 
+/** @brief Format used for the URI representation of a name.
+ *  @sa http://named-data.net/doc/NDN-packet-spec/current/name.html#ndn-uri-scheme
+ */
+enum class UriFormat {
+  /// Always use `<type-number>=<percent-encoded-value>` format
+  CANONICAL,
+  /// Always prefer the alternate format when available
+  ALTERNATE,
+  /// Same as UriFormat::CANONICAL, unless `NDN_NAME_ALT_URI` environment variable is set to '1'
+  ENV_OR_CANONICAL,
+  /// Same as UriFormat::ALTERNATE, unless `NDN_NAME_ALT_URI` environment variable is set to '0'
+  ENV_OR_ALTERNATE,
+  /// Use the library's default format; currently equivalent to UriFormat::ENV_OR_ALTERNATE
+  DEFAULT = ENV_OR_ALTERNATE,
+};
+
 /** @brief Identify a style of NDN Naming Conventions.
  *  @sa https://named-data.net/publications/techreports/ndn-tr-22-2-ndn-memo-naming-conventions/
  */
 enum class Convention {
-  MARKER = 1 << 0, ///< component markers (revision 1)
-  TYPED  = 1 << 1, ///< typed name components (revision 2)
+  MARKER = 1 << 0, ///< Component markers (revision 1)
+  TYPED  = 1 << 1, ///< Typed name components (revision 2)
   EITHER = MARKER | TYPED,
 };
 
-/** @brief Markers in Naming Conventions rev1
+/** @brief Name component markers defined in Naming Conventions revision 1.
+ *  @sa https://named-data.net/publications/techreports/ndn-tr-22-ndn-memo-naming-conventions/
  */
 enum : uint8_t {
   SEGMENT_MARKER = 0x00,
@@ -51,7 +68,7 @@ enum : uint8_t {
 
 /** @brief Return which Naming Conventions style to use while encoding.
  *
- *  The current library default is Convention::MARKER, but this will change in the future.
+ *  The library default is Convention::TYPED.
  */
 Convention
 getConventionEncoding();
@@ -251,19 +268,17 @@ public: // encoding and URI
 
   /**
    * @brief Write *this to the output stream, escaping characters according to the NDN URI format.
-   * @param os The output stream where to write the URI escaped version of *this
-   * @sa http://named-data.net/doc/NDN-packet-spec/current/name.html#ndn-uri-scheme
+   * @sa https://named-data.net/doc/NDN-packet-spec/current/name.html#ndn-uri-scheme
    */
   void
-  toUri(std::ostream& os) const;
+  toUri(std::ostream& os, UriFormat format = UriFormat::DEFAULT) const;
 
   /**
    * @brief Convert *this by escaping characters according to the NDN URI format.
-   * @return The escaped string
-   * @sa http://named-data.net/doc/NDN-packet-spec/current/name.html#ndn-uri-scheme
+   * @sa https://named-data.net/doc/NDN-packet-spec/current/name.html#ndn-uri-scheme
    */
   std::string
-  toUri() const;
+  toUri(UriFormat format = UriFormat::DEFAULT) const;
 
 public: // naming conventions
   /**
@@ -301,13 +316,6 @@ public: // naming conventions
    */
   bool
   isByteOffset() const;
-
-  /// @deprecated use isByteOffset
-  bool
-  isSegmentOffset() const
-  {
-    return isByteOffset();
-  }
 
   /**
    * @brief Check if the component is a timestamp per NDN naming conventions
@@ -376,13 +384,6 @@ public: // naming conventions
    */
   uint64_t
   toByteOffset() const;
-
-  /// @deprecated use toByteOffset
-  uint64_t
-  toSegmentOffset() const
-  {
-    return toByteOffset();
-  }
 
   /**
    * @brief Interpret as timestamp component using NDN naming conventions
@@ -458,13 +459,6 @@ public: // naming conventions
    */
   static Component
   fromByteOffset(uint64_t offset);
-
-  /// @deprecated use fromByteOffset
-  static Component
-  fromSegmentOffset(uint64_t offset)
-  {
-    return fromByteOffset(offset);
-  }
 
   /**
    * @brief Create sequence number component using NDN naming conventions
@@ -651,4 +645,4 @@ NDN_CXX_DECLARE_WIRE_ENCODE_INSTANTIATIONS(Component);
 } // namespace name
 } // namespace ndn
 
-#endif // NDN_NAME_COMPONENT_HPP
+#endif // NDN_CXX_NAME_COMPONENT_HPP

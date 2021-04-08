@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2018 Regents of the University of California.
+ * Copyright (c) 2013-2020 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -21,10 +21,14 @@
 
 #include "tests/unit/security/pib/pib-data-fixture.hpp"
 
-// #include "ndn-cxx/security/pib/pib-memory.hpp"
+// #include "ndn-cxx/security/pib/impl/pib-memory.hpp"
+// #include "ndn-cxx/security/tpm/impl/back-end-mem.hpp"
 // #include "ndn-cxx/security/tpm/tpm.hpp"
-// #include "ndn-cxx/security/tpm/back-end-mem.hpp"
-// #include <fstream>
+// #include "ndn-cxx/util/string-helper.hpp"
+
+// #include "tests/boost-test.hpp"
+
+// #include <iostream>
 
 namespace ndn {
 namespace security {
@@ -49,24 +53,22 @@ namespace tests {
 //         certName
 //           .append("issuer")
 //           .appendVersion(certVersion);
-//         v2::Certificate cert;
+//         Certificate cert;
 //         cert.setName(certName);
 //         cert.setFreshnessPeriod(1_h);
 //         cert.setContent(tpm.getPublicKey(keyName));
 
-//         // @TODO sign using the new KeyChain
+//         // TODO: sign using KeyChain
 //         SignatureInfo info;
 //         info.setSignatureType(tlv::SignatureSha256WithEcdsa);
-//         info.setKeyLocator(KeyLocator(keyName));
+//         info.setKeyLocator(keyName);
 //         info.setValidityPeriod(ValidityPeriod(time::fromIsoString("20170102T000000"),
 //                                               time::fromIsoString("20180102T000000")));
-//         cert.setSignature(Signature(info, Block()));
+//         cert.setSignatureInfo(info);
 
 //         EncodingBuffer buf;
 //         cert.wireEncode(buf, true);
-
-//         cert.setSignatureValue(Block(tlv::SignatureValue,
-//                                      tpm.sign(buf.buf(), buf.size(), keyName, DigestAlgorithm::SHA256)));
+//         cert.setSignatureValue(tpm.sign(buf.buf(), buf.size(), keyName, DigestAlgorithm::SHA256));
 
 //         printBytes(prefix + "_KEY" + to_string(keyId) + "_CERT" + to_string(certVersion),
 //                    cert.wireEncode());
@@ -83,7 +85,7 @@ namespace tests {
 //   static void
 //   printBytes(const std::string& name, const Buffer& buffer)
 //   {
-//     printBytes(name, buffer.buf(), buffer.size());
+//     printBytes(name, buffer.data(), buffer.size());
 //   }
 
 //   static void
@@ -108,7 +110,7 @@ namespace tests {
 //               << "};" << std::endl;
 //   }
 
-// public:
+// private:
 //   pib::PibMemory pib;
 //   Tpm tpm;
 // };

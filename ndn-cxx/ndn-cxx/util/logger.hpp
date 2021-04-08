@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_UTIL_LOGGER_HPP
-#define NDN_UTIL_LOGGER_HPP
+#ifndef NDN_CXX_UTIL_LOGGER_HPP
+#define NDN_CXX_UTIL_LOGGER_HPP
 
 #include "ndn-cxx/detail/common.hpp"
 
@@ -113,7 +113,13 @@ template<class T>
 struct ExtractArgument;
 
 template<class T, class U>
-struct ExtractArgument<T(U)>
+struct ExtractArgument<T(U&)>
+{
+  using type = U;
+};
+
+template<class T, class U>
+struct ExtractArgument<T(U)&>
 {
   using type = U;
 };
@@ -190,9 +196,9 @@ using ArgumentType = typename ExtractArgument<T>::type;
  *        a dot (`.`), or contain multiple consecutive dots.
  */
 #define NDN_LOG_MEMBER_INIT(cls, name) \
-  const bool ::ndn::util::detail::ArgumentType<void(cls)>::ndn_cxx_loggerRegistration = \
+  const bool ::ndn::util::detail::ArgumentType<void(cls&)>::ndn_cxx_loggerRegistration = \
   NDN_LOG_REGISTER_NAME(name); \
-  ::ndn::util::Logger& ::ndn::util::detail::ArgumentType<void(cls)>::ndn_cxx_getLogger() \
+  ::ndn::util::Logger& ::ndn::util::detail::ArgumentType<void(cls&)>::ndn_cxx_getLogger() \
   NDN_LOG_INIT_FUNCTION_BODY(name) \
   struct ndn_cxx_allow_trailing_semicolon
 
@@ -202,9 +208,9 @@ using ArgumentType = typename ExtractArgument<T>::type;
  */
 #define NDN_LOG_MEMBER_DECL_SPECIALIZED(cls) \
   template<> \
-  const bool ::ndn::util::detail::ArgumentType<void(cls)>::ndn_cxx_loggerRegistration; \
+  const bool ::ndn::util::detail::ArgumentType<void(cls&)>::ndn_cxx_loggerRegistration; \
   template<> \
-  ::ndn::util::Logger& ::ndn::util::detail::ArgumentType<void(cls)>::ndn_cxx_getLogger()
+  ::ndn::util::Logger& ::ndn::util::detail::ArgumentType<void(cls&)>::ndn_cxx_getLogger()
 
 /** \brief Define an explicit specialization of a member log module of a class template.
  *
@@ -219,30 +225,22 @@ using ArgumentType = typename ExtractArgument<T>::type;
  */
 #define NDN_LOG_MEMBER_INIT_SPECIALIZED(cls, name) \
   template<> \
-  const bool ::ndn::util::detail::ArgumentType<void(cls)>::ndn_cxx_loggerRegistration = \
+  const bool ::ndn::util::detail::ArgumentType<void(cls&)>::ndn_cxx_loggerRegistration = \
   NDN_LOG_REGISTER_NAME(name); \
   template<> \
-  ::ndn::util::Logger& ::ndn::util::detail::ArgumentType<void(cls)>::ndn_cxx_getLogger() \
+  ::ndn::util::Logger& ::ndn::util::detail::ArgumentType<void(cls&)>::ndn_cxx_getLogger() \
   NDN_LOG_INIT_FUNCTION_BODY(name) \
   struct ndn_cxx_allow_trailing_semicolon
 
 /** \cond */
-#if BOOST_VERSION == 105900
-// workaround Boost bug 11549
-#define NDN_BOOST_LOG(x, sev) BOOST_LOG_SEV(x, sev) << ""
-#else
-#define NDN_BOOST_LOG(x, sev) BOOST_LOG_SEV(x, sev)
-#endif
-
 // implementation detail
 #define NDN_LOG_INTERNAL(lvl, expression) \
   do { \
     if (ndn_cxx_getLogger().isLevelEnabled(::ndn::util::LogLevel::lvl)) { \
-      NDN_BOOST_LOG(ndn_cxx_getLogger(), ::ndn::util::LogLevel::lvl)  \
+      BOOST_LOG_SEV(ndn_cxx_getLogger(), ::ndn::util::LogLevel::lvl)  \
         << expression; \
     } \
   } while (false)
-
 /** \endcond */
 
 /** \brief Log at TRACE level.
@@ -280,4 +278,4 @@ using ArgumentType = typename ExtractArgument<T>::type;
 
 #endif // HAVE_NDN_CXX_CUSTOM_LOGGER
 
-#endif // NDN_UTIL_LOGGER_HPP
+#endif // NDN_CXX_UTIL_LOGGER_HPP

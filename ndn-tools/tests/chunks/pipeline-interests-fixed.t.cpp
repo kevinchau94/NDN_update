@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016-2019, Regents of the University of California,
+ * Copyright (c) 2016-2020, Regents of the University of California,
  *                          Colorado State University,
  *                          University Pierre & Marie Curie, Sorbonne University.
  *
@@ -37,8 +37,11 @@ class PipelineInterestFixedFixture : public PipelineInterestsFixture
 {
 public:
   PipelineInterestFixedFixture()
-    : opt(makeOptions())
   {
+    opt.interestLifetime = 1_s;
+    opt.maxRetriesOnTimeoutOrNack = 3;
+    opt.isQuiet = true;
+    opt.maxPipelineSize = 5;
     createPipeline();
   }
 
@@ -50,21 +53,8 @@ public:
     setPipeline(std::move(pline));
   }
 
-private:
-  static PipelineInterestsFixed::Options
-  makeOptions()
-  {
-    PipelineInterestsFixed::Options options;
-    options.isQuiet = true;
-    options.isVerbose = false;
-    options.interestLifetime = time::seconds(1);
-    options.maxRetriesOnTimeoutOrNack = 3;
-    options.maxPipelineSize = 5;
-    return options;
-  }
-
 protected:
-  PipelineInterestsFixed::Options opt;
+  Options opt;
   PipelineInterestsFixed* pipeline;
 };
 
@@ -77,12 +67,12 @@ BOOST_AUTO_TEST_CASE(FullPipeline)
   BOOST_ASSERT(nDataSegments > opt.maxPipelineSize);
 
   run(name);
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize);
 
   for (uint64_t i = 0; i < nDataSegments - 1; ++i) {
     face.receive(*makeDataWithSegment(i));
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
     BOOST_CHECK_EQUAL(pipeline->m_nReceived, i + 1);
 
     if (i < nDataSegments - opt.maxPipelineSize) {
@@ -102,7 +92,7 @@ BOOST_AUTO_TEST_CASE(FullPipeline)
 
   BOOST_CHECK_EQUAL(hasFailed, false);
 
-  advanceClocks(io, ndn::DEFAULT_INTEREST_LIFETIME, opt.maxRetriesOnTimeoutOrNack + 1);
+  advanceClocks(ndn::DEFAULT_INTEREST_LIFETIME, opt.maxRetriesOnTimeoutOrNack + 1);
   BOOST_CHECK_EQUAL(hasFailed, true);
 }
 
@@ -112,11 +102,11 @@ BOOST_AUTO_TEST_CASE(TimeoutAllSegments)
   BOOST_ASSERT(nDataSegments > opt.maxPipelineSize);
 
   run(name);
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize);
 
   for (int i = 0; i < opt.maxRetriesOnTimeoutOrNack; ++i) {
-    advanceClocks(io, opt.interestLifetime, 1);
+    advanceClocks(opt.interestLifetime);
     BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize * (i + 2));
     BOOST_CHECK_EQUAL(pipeline->m_nReceived, 0);
 
@@ -127,7 +117,7 @@ BOOST_AUTO_TEST_CASE(TimeoutAllSegments)
     }
   }
 
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
   BOOST_CHECK_EQUAL(hasFailed, true);
 }
 
@@ -140,23 +130,23 @@ BOOST_AUTO_TEST_CASE(TimeoutAfterFinalBlockIdReceived)
   BOOST_ASSERT(nDataSegments > opt.maxPipelineSize);
 
   run(name);
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize);
 
   // send a single segment for each pipeline element but not the first element
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
   for (uint64_t i = 1; i < opt.maxPipelineSize; ++i) {
     face.receive(*makeDataWithSegment(i));
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
   }
 
   // send a single data packet for each pipeline element
-  advanceClocks(io, opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack - 1);
+  advanceClocks(opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack - 1);
   for (uint64_t i = 0; i < opt.maxPipelineSize; ++i) {
     face.receive(*makeDataWithSegment(opt.maxPipelineSize + i));
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
   }
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
 
   size_t interestAfterFailure = face.sentInterests.size();
 
@@ -164,14 +154,14 @@ BOOST_AUTO_TEST_CASE(TimeoutAfterFinalBlockIdReceived)
   BOOST_CHECK_EQUAL(hasFailed, true);
 
   // these new segments should not generate new interests
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
   for (uint64_t i = 0; i < opt.maxPipelineSize; ++i) {
     face.receive(*makeDataWithSegment(opt.maxPipelineSize * 2 + i - 1));
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
   }
 
   // no more interests after a failure
-  advanceClocks(io, opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack);
+  advanceClocks(opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack);
   BOOST_CHECK_EQUAL(interestAfterFailure, face.sentInterests.size());
   BOOST_CHECK_EQUAL(face.getNPendingInterests(), 0);
 }
@@ -185,13 +175,13 @@ BOOST_AUTO_TEST_CASE(TimeoutBeforeFinalBlockIdReceived)
   BOOST_ASSERT(nDataSegments > opt.maxPipelineSize);
 
   run(name);
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize);
 
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
   for (uint64_t i = 2; i < opt.maxPipelineSize; ++i) {
     face.receive(*makeDataWithSegment(i, false));
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
 
     const auto& lastInterest = face.sentInterests.back();
     BOOST_CHECK_EQUAL(getSegmentFromPacket(lastInterest), opt.maxPipelineSize + i - 2);
@@ -205,7 +195,7 @@ BOOST_AUTO_TEST_CASE(TimeoutBeforeFinalBlockIdReceived)
 
   // all the pipeline elements are two retries near the timeout error, but not the
   // second (segment #1) that is only one retry near the timeout
-  advanceClocks(io, opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack - 1);
+  advanceClocks(opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack - 1);
   BOOST_CHECK_EQUAL(hasFailed, false);
 
   // data for the first pipeline element (segment #0)
@@ -220,10 +210,10 @@ BOOST_AUTO_TEST_CASE(TimeoutBeforeFinalBlockIdReceived)
     else {
       face.receive(*makeDataWithSegment(i, false));
     }
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
   }
   // timeout for the second pipeline element (segment #1), this should trigger an error
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
 
   BOOST_CHECK_EQUAL(pipeline->m_nReceived, nDataSegments - 1);
   BOOST_CHECK_EQUAL(hasFailed, true);
@@ -238,10 +228,10 @@ BOOST_AUTO_TEST_CASE(SegmentReceivedAfterTimeout)
   BOOST_ASSERT(nDataSegments > opt.maxPipelineSize);
 
   run(name);
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize);
 
-  advanceClocks(io, opt.interestLifetime, 1);
+  advanceClocks(opt.interestLifetime);
 
   // nack for the first pipeline element (segment #0)
   auto nack = make_shared<lp::Nack>(face.sentInterests[opt.maxPipelineSize]);
@@ -250,13 +240,13 @@ BOOST_AUTO_TEST_CASE(SegmentReceivedAfterTimeout)
   BOOST_CHECK_EQUAL(hasFailed, false);
 
   // timeout for all the pipeline elements, but not the first (segment #0)
-  advanceClocks(io, opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack);
+  advanceClocks(opt.interestLifetime, opt.maxRetriesOnTimeoutOrNack);
   BOOST_CHECK_EQUAL(hasFailed, false);
 
   // data for the first pipeline element (segment #0), this should trigger an error because the
   // other pipeline elements failed
   face.receive(*makeDataWithSegment(0, false));
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
 
   BOOST_CHECK_EQUAL(pipeline->m_nReceived, 1);
   BOOST_CHECK_EQUAL(hasFailed, true);
@@ -268,7 +258,7 @@ BOOST_AUTO_TEST_CASE(CongestionAllSegments)
   BOOST_ASSERT(nDataSegments > opt.maxPipelineSize);
 
   run(name);
-  advanceClocks(io, time::nanoseconds(1), 1);
+  advanceClocks(time::nanoseconds(1));
   BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize);
 
   // send nack for all the pipeline elements first interest
@@ -276,7 +266,7 @@ BOOST_AUTO_TEST_CASE(CongestionAllSegments)
     auto nack = make_shared<lp::Nack>(face.sentInterests[i]);
     nack->setReason(lp::NackReason::CONGESTION);
     face.receive(*nack);
-    advanceClocks(io, time::nanoseconds(1), 1);
+    advanceClocks(time::nanoseconds(1));
   }
 
   // send nack for all the pipeline elements interests after the first
@@ -285,7 +275,7 @@ BOOST_AUTO_TEST_CASE(CongestionAllSegments)
     if (backoffTime > DataFetcher::MAX_CONGESTION_BACKOFF_TIME)
       backoffTime = DataFetcher::MAX_CONGESTION_BACKOFF_TIME;
 
-    advanceClocks(io, backoffTime, 1);
+    advanceClocks(backoffTime);
     BOOST_REQUIRE_EQUAL(face.sentInterests.size(), opt.maxPipelineSize * (i +1));
 
     // A single retry for every pipeline element
@@ -298,7 +288,7 @@ BOOST_AUTO_TEST_CASE(CongestionAllSegments)
       auto nack = make_shared<lp::Nack>(face.sentInterests[(opt.maxPipelineSize * i) + j]);
       nack->setReason(lp::NackReason::CONGESTION);
       face.receive(*nack);
-      advanceClocks(io, time::nanoseconds(1), 1);
+      advanceClocks(time::nanoseconds(1));
     }
   }
 

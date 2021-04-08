@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2020 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -24,6 +24,7 @@
 #include "ndn-cxx/impl/face-impl.hpp"
 #include "ndn-cxx/net/face-uri.hpp"
 #include "ndn-cxx/security/signing-helpers.hpp"
+#include "ndn-cxx/util/scope.hpp"
 #include "ndn-cxx/util/time.hpp"
 
 // NDN_LOG_INIT(ndn.Face) is declared in face-impl.hpp
@@ -100,9 +101,6 @@ Face::Face(shared_ptr<Transport> transport, boost::asio::io_service& ioService, 
 shared_ptr<Transport>
 Face::makeDefaultTransport()
 {
-  // transport=unix:///var/run/nfd.sock
-  // transport=tcp://localhost:6363
-
   std::string transportUri;
 
   const char* transportEnviron = getenv("NDN_CLIENT_TRANSPORT");
@@ -173,25 +171,17 @@ Face::expressInterest(const Interest& interest,
   interest2->getNonce();
 
   IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncExpressInterest(id, interest2, afterSatisfied, afterNacked, afterTimeout);
+    impl->expressInterest(id, interest2, afterSatisfied, afterNacked, afterTimeout);
   } IO_CAPTURE_WEAK_IMPL_END
 
-  return PendingInterestHandle(*this, reinterpret_cast<const PendingInterestId*>(id));
-}
-
-void
-Face::cancelPendingInterest(const PendingInterestId* pendingInterestId)
-{
-  IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncRemovePendingInterest(reinterpret_cast<RecordId>(pendingInterestId));
-  } IO_CAPTURE_WEAK_IMPL_END
+  return PendingInterestHandle(m_impl, id);
 }
 
 void
 Face::removeAllPendingInterests()
 {
   IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncRemoveAllPendingInterests();
+    impl->removeAllPendingInterests();
   } IO_CAPTURE_WEAK_IMPL_END
 }
 
@@ -205,7 +195,7 @@ void
 Face::put(Data data)
 {
   IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncPutData(data);
+    impl->putData(data);
   } IO_CAPTURE_WEAK_IMPL_END
 }
 
@@ -213,7 +203,7 @@ void
 Face::put(lp::Nack nack)
 {
   IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncPutNack(nack);
+    impl->putNack(nack);
   } IO_CAPTURE_WEAK_IMPL_END
 }
 
@@ -236,7 +226,7 @@ Face::setInterestFilter(const InterestFilter& filter, const InterestCallback& on
 
   auto id = m_impl->registerPrefix(filter.getPrefix(), onSuccess, onFailure, flags, options,
                                    filter, onInterest);
-  return RegisteredPrefixHandle(*this, reinterpret_cast<const RegisteredPrefixId*>(id));
+  return RegisteredPrefixHandle(m_impl, id);
 }
 
 InterestFilterHandle
@@ -245,18 +235,10 @@ Face::setInterestFilter(const InterestFilter& filter, const InterestCallback& on
   auto id = m_impl->m_interestFilterTable.allocateId();
 
   IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncSetInterestFilter(id, filter, onInterest);
+    impl->setInterestFilter(id, filter, onInterest);
   } IO_CAPTURE_WEAK_IMPL_END
 
-  return InterestFilterHandle(*this, reinterpret_cast<const InterestFilterId*>(id));
-}
-
-void
-Face::clearInterestFilter(const InterestFilterId* interestFilterId)
-{
-  IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncUnsetInterestFilter(reinterpret_cast<RecordId>(interestFilterId));
-  } IO_CAPTURE_WEAK_IMPL_END
+  return InterestFilterHandle(m_impl, id);
 }
 
 RegisteredPrefixHandle
@@ -270,18 +252,7 @@ Face::registerPrefix(const Name& prefix,
   options.setSigningInfo(signingInfo);
 
   auto id = m_impl->registerPrefix(prefix, onSuccess, onFailure, flags, options, nullopt, nullptr);
-  return RegisteredPrefixHandle(*this, reinterpret_cast<const RegisteredPrefixId*>(id));
-}
-
-void
-Face::unregisterPrefixImpl(const RegisteredPrefixId* registeredPrefixId,
-                           const UnregisterPrefixSuccessCallback& onSuccess,
-                           const UnregisterPrefixFailureCallback& onFailure)
-{
-  IO_CAPTURE_WEAK_IMPL(post) {
-    impl->asyncUnregisterPrefix(reinterpret_cast<RecordId>(registeredPrefixId),
-                                onSuccess, onFailure);
-  } IO_CAPTURE_WEAK_IMPL_END
+  return RegisteredPrefixHandle(m_impl, id);
 }
 
 void
@@ -291,32 +262,28 @@ Face::doProcessEvents(time::milliseconds timeout, bool keepThread)
     m_ioService.reset(); // ensure that run()/poll() will do some work
   }
 
-  try {
-    if (timeout < time::milliseconds::zero()) {
-      // do not block if timeout is negative, but process pending events
-      m_ioService.poll();
-      return;
-    }
+  auto onThrow = make_scope_fail([this] { m_impl->shutdown(); });
 
-    if (timeout > time::milliseconds::zero()) {
-      m_impl->m_processEventsTimeoutEvent = m_impl->m_scheduler.schedule(timeout,
-        [&io = m_ioService, &work = m_impl->m_ioServiceWork] {
-          io.stop();
-          work.reset();
-        });
-    }
-
-    if (keepThread) {
-      // work will ensure that m_ioService is running until work object exists
-      m_impl->m_ioServiceWork = make_unique<boost::asio::io_service::work>(m_ioService);
-    }
-
-    m_ioService.run();
+  if (timeout < 0_ms) {
+    // do not block if timeout is negative, but process pending events
+    m_ioService.poll();
+    return;
   }
-  catch (...) {
-    m_impl->shutdown();
-    throw;
+
+  if (timeout > 0_ms) {
+    m_impl->m_processEventsTimeoutEvent = m_impl->m_scheduler.schedule(timeout,
+      [&io = m_ioService, &work = m_impl->m_ioServiceWork] {
+        io.stop();
+        work.reset();
+      });
   }
+
+  if (keepThread) {
+    // work will ensure that m_ioService is running until work object exists
+    m_impl->m_ioServiceWork = make_unique<boost::asio::io_service::work>(m_ioService);
+  }
+
+  m_ioService.run();
 }
 
 void
@@ -376,38 +343,61 @@ Face::onReceiveElement(const Block& blockFromDaemon)
   }
 }
 
-PendingInterestHandle::PendingInterestHandle(Face& face, const PendingInterestId* id)
-  : CancelHandle([&face, id] { face.cancelPendingInterest(id); })
+PendingInterestHandle::PendingInterestHandle(weak_ptr<Face::Impl> weakImpl, detail::RecordId id)
+  : CancelHandle([w = std::move(weakImpl), id] {
+      auto impl = w.lock();
+      if (impl != nullptr) {
+        impl->asyncRemovePendingInterest(id);
+      }
+    })
 {
 }
 
-RegisteredPrefixHandle::RegisteredPrefixHandle(Face& face, const RegisteredPrefixId* id)
-  : CancelHandle([&face, id] { face.unregisterPrefixImpl(id, nullptr, nullptr); })
-  , m_face(&face)
+RegisteredPrefixHandle::RegisteredPrefixHandle(weak_ptr<Face::Impl> weakImpl, detail::RecordId id)
+  : CancelHandle([=] { unregister(weakImpl, id, nullptr, nullptr); })
+  , m_weakImpl(std::move(weakImpl))
   , m_id(id)
 {
-  // The lambda passed to CancelHandle constructor cannot call this->unregister,
-  // because base class destructor cannot access the member fields of this subclass.
+  // The lambda passed to CancelHandle constructor cannot call the non-static unregister(),
+  // because the base class destructor cannot access the member fields of this subclass.
 }
 
 void
 RegisteredPrefixHandle::unregister(const UnregisterPrefixSuccessCallback& onSuccess,
                                    const UnregisterPrefixFailureCallback& onFailure)
 {
-  if (m_id == nullptr) {
-    if (onFailure != nullptr) {
+  if (m_id == 0) {
+    if (onFailure) {
       onFailure("RegisteredPrefixHandle is empty");
     }
     return;
   }
 
-  m_face->unregisterPrefixImpl(m_id, onSuccess, onFailure);
-  m_face = nullptr;
-  m_id = nullptr;
+  unregister(m_weakImpl, m_id, onSuccess, onFailure);
+  *this = {};
 }
 
-InterestFilterHandle::InterestFilterHandle(Face& face, const InterestFilterId* id)
-  : CancelHandle([&face, id] { face.clearInterestFilter(id); })
+void
+RegisteredPrefixHandle::unregister(const weak_ptr<Face::Impl>& weakImpl, detail::RecordId id,
+                                   const UnregisterPrefixSuccessCallback& onSuccess,
+                                   const UnregisterPrefixFailureCallback& onFailure)
+{
+  auto impl = weakImpl.lock();
+  if (impl != nullptr) {
+    impl->asyncUnregisterPrefix(id, onSuccess, onFailure);
+  }
+  else if (onFailure) {
+    onFailure("Face already closed");
+  }
+}
+
+InterestFilterHandle::InterestFilterHandle(weak_ptr<Face::Impl> weakImpl, detail::RecordId id)
+  : CancelHandle([w = std::move(weakImpl), id] {
+      auto impl = w.lock();
+      if (impl != nullptr) {
+        impl->asyncUnsetInterestFilter(id);
+      }
+    })
 {
 }
 

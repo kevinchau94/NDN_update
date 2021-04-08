@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016-2019, Regents of the University of California,
+ * Copyright (c) 2016-2020, Regents of the University of California,
  *                          Colorado State University,
  *                          University Pierre & Marie Curie, Sorbonne University.
  *
@@ -28,9 +28,16 @@
 #include "tools/chunks/catchunks/pipeline-interests.hpp"
 
 #include "tests/test-common.hpp"
+#include "tests/io-fixture.hpp"
 
 #include <ndn-cxx/security/validator-null.hpp>
 #include <ndn-cxx/util/dummy-client-face.hpp>
+
+#if BOOST_VERSION >= 105900
+#include <boost/test/tools/output_test_stream.hpp>
+#else
+#include <boost/test/output_test_stream.hpp>
+#endif
 
 namespace ndn {
 namespace chunks {
@@ -42,21 +49,16 @@ using boost::test_tools::output_test_stream;
 BOOST_AUTO_TEST_SUITE(Chunks)
 BOOST_AUTO_TEST_SUITE(TestConsumer)
 
-BOOST_AUTO_TEST_CASE(OutputDataSequential)
+BOOST_AUTO_TEST_CASE(InOrderData)
 {
-  // Test sequential segments in the right order
-  // Segment order: 0 1 2
+  // Segment order: 0 1 2 3
 
-  std::string name("/ndn/chunks/test");
-
-  std::vector<std::string> testStrings {
+  const std::string name("/ndn/chunks/test");
+  const std::vector<std::string> testStrings {
       "",
-
       "a1b2c3%^&(#$&%^$$/><",
-
       "123456789123456789123456789123456789123456789123456789123456789"
       "123456789123456789123456789123456789123456789123456789123456789",
-
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. "
       "Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur "
       "ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla "
@@ -65,7 +67,7 @@ BOOST_AUTO_TEST_CASE(OutputDataSequential)
 
   util::DummyClientFace face;
   output_test_stream output("");
-  Consumer cons(security::v2::getAcceptAllValidator(), output);
+  Consumer cons(security::getAcceptAllValidator(), output);
 
   auto interest = makeInterest(name, true);
 
@@ -83,28 +85,24 @@ BOOST_AUTO_TEST_CASE(OutputDataSequential)
   }
 }
 
-BOOST_AUTO_TEST_CASE(OutputDataUnordered)
+BOOST_AUTO_TEST_CASE(OutOfOrderData)
 {
-  // Test unordered segments
   // Segment order: 1 0 2
 
-  std::string name("/ndn/chunks/test");
-
-  std::vector<std::string> testStrings {
+  const std::string name("/ndn/chunks/test");
+  const std::vector<std::string> testStrings {
       "a1b2c3%^&(#$&%^$$/><",
-
       "123456789123456789123456789123456789123456789123456789123456789"
       "123456789123456789123456789123456789123456789123456789123456789",
-
       "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. "
       "Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur "
       "ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla "
       "consequat massa Donec pede justo,"
-  };;
+  };
 
   util::DummyClientFace face;
   output_test_stream output("");
-  Consumer cons(security::v2::getAcceptAllValidator(), output);
+  Consumer cons(security::getAcceptAllValidator(), output);
 
   auto interest = makeInterest(name, true);
   std::vector<shared_ptr<Data>> dataStore;
@@ -136,11 +134,7 @@ BOOST_AUTO_TEST_CASE(OutputDataUnordered)
 class PipelineInterestsDummy : public PipelineInterests
 {
 public:
-  PipelineInterestsDummy(Face& face)
-    : PipelineInterests(face)
-    , isPipelineRunning(false)
-  {
-  }
+  using PipelineInterests::PipelineInterests;
 
 private:
   void
@@ -155,31 +149,26 @@ private:
   }
 
 public:
-  bool isPipelineRunning;
+  bool isPipelineRunning = false;
 };
 
-BOOST_FIXTURE_TEST_CASE(RunBasic, UnitTestTimeFixture)
+BOOST_FIXTURE_TEST_CASE(RunBasic, IoFixture)
 {
-  boost::asio::io_service io;
-  util::DummyClientFace face(io);
-  Consumer consumer(security::v2::getAcceptAllValidator());
+  util::DummyClientFace face(m_io);
+  Options options;
+  Consumer consumer(security::getAcceptAllValidator());
 
   Name prefix = Name("/ndn/chunks/test").appendVersion(1);
-  auto discover = make_unique<DiscoverVersion>(prefix, face, Options());
-  auto pipeline = make_unique<PipelineInterestsDummy>(face);
+  auto discover = make_unique<DiscoverVersion>(face, prefix, options);
+  auto pipeline = make_unique<PipelineInterestsDummy>(face, options);
   auto pipelinePtr = pipeline.get();
 
+  BOOST_CHECK_EQUAL(pipelinePtr->isPipelineRunning, false);
+
   consumer.run(std::move(discover), std::move(pipeline));
+  this->advanceClocks(1_ms);
 
-  this->advanceClocks(io, time::nanoseconds(1));
-  // no discovery interest is issued
-  BOOST_CHECK_EQUAL(face.sentInterests.size(), 0);
-
-  // this Data packet answers the discovery Interest, so it must end with a version number
-  auto data = makeData(prefix.appendVersion(0));
-  face.receive(*data);
-
-  this->advanceClocks(io, time::nanoseconds(1));
+  BOOST_CHECK_EQUAL(face.sentInterests.size(), 0); // no discovery Interests are issued
   BOOST_CHECK_EQUAL(pipelinePtr->isPipelineRunning, true);
 }
 

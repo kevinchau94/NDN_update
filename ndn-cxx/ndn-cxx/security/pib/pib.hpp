@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2018 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_SECURITY_PIB_PIB_HPP
-#define NDN_SECURITY_PIB_PIB_HPP
+#ifndef NDN_CXX_SECURITY_PIB_PIB_HPP
+#define NDN_CXX_SECURITY_PIB_PIB_HPP
 
 #include "ndn-cxx/security/pib/identity-container.hpp"
 
@@ -43,8 +43,8 @@ class PibImpl;
  * the Pib class provides access to identities, and allows setting a default identity. Properties of
  * an identity can be accessed after obtaining an Identity object.
  *
- * @note Pib instance is created and managed only by v2::KeyChain.  v2::KeyChain::getPib()
- *       returns a const reference to the managed Pib instance, through which it is possible to
+ * @note Pib instance is created and managed only by KeyChain. KeyChain::getPib() returns
+ *       a const reference to the managed Pib instance, through which it is possible to
  *       retrieve information about identities, keys, and certificates.
  *
  * @throw PibImpl::Error when underlying implementation has non-semantic error.
@@ -174,7 +174,7 @@ protected:
 
   shared_ptr<PibImpl> m_impl;
 
-  friend class v2::KeyChain;
+  friend KeyChain;
 };
 
 } // namespace pib
@@ -184,4 +184,4 @@ using pib::Pib;
 } // namespace security
 } // namespace ndn
 
-#endif // NDN_SECURITY_PIB_PIB_HPP
+#endif // NDN_CXX_SECURITY_PIB_PIB_HPP

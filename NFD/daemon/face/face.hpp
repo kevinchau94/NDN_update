@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Regents of the University of California,
+ * Copyright (c) 2014-2021,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -34,6 +34,8 @@
 namespace nfd {
 namespace face {
 
+class Channel;
+
 /** \brief indicates the state of a face
  */
 typedef TransportState FaceState;
@@ -49,7 +51,7 @@ typedef TransportState FaceState;
  *  LinkService is the upper part, which translates between network-layer packets
  *  and TLV blocks, and may provide additional services such as fragmentation and reassembly.
  */
-class Face FINAL_UNLESS_WITH_TESTS : public std::enable_shared_from_this<Face>, noncopyable
+class Face NFD_FINAL_UNLESS_WITH_TESTS : public std::enable_shared_from_this<Face>, noncopyable
 {
 public:
   Face(unique_ptr<LinkService> service, unique_ptr<Transport> transport);
@@ -60,21 +62,33 @@ public:
   Transport*
   getTransport() const;
 
+  /** \brief Request that the face be closed
+   *
+   *  This operation is effective only if face is in the UP or DOWN state; otherwise, it has no effect.
+   *  The face will change state to CLOSING, and then perform a cleanup procedure.
+   *  When the cleanup is complete, the state will be changed to CLOSED, which may happen
+   *  synchronously or asynchronously.
+   *
+   *  \warning The face must not be deallocated until its state changes to CLOSED.
+   */
+  void
+  close();
+
 public: // upper interface connected to forwarding
-  /** \brief send Interest to \p endpointId
+  /** \brief send Interest
    */
   void
-  sendInterest(const Interest& interest, const EndpointId& endpointId);
+  sendInterest(const Interest& interest);
 
-  /** \brief send Data to \p endpointId
+  /** \brief send Data
    */
   void
-  sendData(const Data& data, const EndpointId& endpointId);
+  sendData(const Data& data);
 
-  /** \brief send Nack to \p endpointId
+  /** \brief send Nack
    */
   void
-  sendNack(const lp::Nack& nack, const EndpointId& endpointId);
+  sendNack(const lp::Nack& nack);
 
   /** \brief signals on Interest received
    */
@@ -92,7 +106,7 @@ public: // upper interface connected to forwarding
    */
   signal::Signal<LinkService, Interest>& onDroppedInterest;
 
-public: // static properties
+public: // properties
   /** \return face ID
    */
   FaceId
@@ -134,7 +148,13 @@ public: // static properties
   ndn::nfd::LinkType
   getLinkType() const;
 
-public: // dynamic properties
+  /** \brief Returns face effective MTU
+   *
+   *  This function is a wrapper. The effective MTU of a face is determined by the link service.
+   */
+  ssize_t
+  getMtu() const;
+
   /** \return face state
    */
   FaceState
@@ -150,27 +170,33 @@ public: // dynamic properties
   time::steady_clock::TimePoint
   getExpirationTime() const;
 
-  /** \brief request the face to be closed
-   *
-   *  This operation is effective only if face is in UP or DOWN state,
-   *  otherwise it has no effect.
-   *  The face changes state to CLOSING, and performs cleanup procedure.
-   *  The state will be changed to CLOSED when cleanup is complete, which may
-   *  happen synchronously or asynchronously.
-   *
-   *  \warning the face must not be deallocated until its state changes to CLOSED
-   */
-  void
-  close();
-
   const FaceCounters&
   getCounters() const;
+
+  /**
+   * \brief Get channel on which face was created (unicast) or the associated channel (multicast)
+   */
+  weak_ptr<Channel>
+  getChannel() const
+  {
+    return m_channel;
+  }
+
+  /**
+   * \brief Set channel on which face was created (unicast) or the associated channel (multicast)
+   */
+  void
+  setChannel(weak_ptr<Channel> channel)
+  {
+    m_channel = std::move(channel);
+  }
 
 private:
   FaceId m_id;
   unique_ptr<LinkService> m_service;
   unique_ptr<Transport> m_transport;
   FaceCounters m_counters;
+  weak_ptr<Channel> m_channel;
 };
 
 inline LinkService*
@@ -186,21 +212,27 @@ Face::getTransport() const
 }
 
 inline void
-Face::sendInterest(const Interest& interest, const EndpointId& endpointId)
+Face::close()
 {
-  m_service->sendInterest(interest, endpointId);
+  m_transport->close();
 }
 
 inline void
-Face::sendData(const Data& data, const EndpointId& endpointId)
+Face::sendInterest(const Interest& interest)
 {
-  m_service->sendData(data, endpointId);
+  m_service->sendInterest(interest);
 }
 
 inline void
-Face::sendNack(const lp::Nack& nack, const EndpointId& endpointId)
+Face::sendData(const Data& data)
 {
-  m_service->sendNack(nack, endpointId);
+  m_service->sendData(data);
+}
+
+inline void
+Face::sendNack(const lp::Nack& nack)
+{
+  m_service->sendNack(nack);
 }
 
 inline FaceId
@@ -251,6 +283,12 @@ Face::getLinkType() const
   return m_transport->getLinkType();
 }
 
+inline ssize_t
+Face::getMtu() const
+{
+  return m_service->getEffectiveMtu();
+}
+
 inline FaceState
 Face::getState() const
 {
@@ -261,12 +299,6 @@ inline time::steady_clock::TimePoint
 Face::getExpirationTime() const
 {
   return m_transport->getExpirationTime();
-}
-
-inline void
-Face::close()
-{
-  m_transport->close();
 }
 
 inline const FaceCounters&

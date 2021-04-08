@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2018 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -22,9 +22,8 @@
 #include "ndn-cxx/prefix-announcement.hpp"
 #include "ndn-cxx/encoding/tlv-nfd.hpp"
 
-#include "tests/boost-test.hpp"
-#include "tests/identity-management-fixture.hpp"
-#include "tests/make-interest-data.hpp"
+#include "tests/key-chain-fixture.hpp"
+#include "tests/test-common.hpp"
 
 namespace ndn {
 namespace tests {
@@ -35,8 +34,8 @@ static Data
 makePrefixAnnData()
 {
   return Data(
-    "067A 071A announced-name=/net/example 08036E6574 08076578616D706C65"
-    "          keyword-prefix-ann=20025041 version=0802FD01 segment=08020000"
+    "0678 0718 announced-name=/net/example 08036E6574 08076578616D706C65"
+    "          keyword-prefix-ann=20025041 version=230101 segment=210100"
     "     1403 content-type=prefix-ann 180105"
     "     1530 expire in one hour 6D040036EE80"
     "          validity FD00FD26 FD00FE0F323031383130333054303030303030"
@@ -92,63 +91,78 @@ BOOST_AUTO_TEST_CASE(DecodeBad)
   // wrong ContentType
   Data data0 = makePrefixAnnData();
   data0.setContentType(tlv::ContentType_Blob);
-  BOOST_CHECK_THROW(PrefixAnnouncement pa0(data0), tlv::Error);
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data0}, tlv::Error, [] (const auto& e) {
+    return e.what() == "Data is not a prefix announcement: ContentType is 0"s;
+  });
 
   // Name has no "32=PA" keyword
   Data data1 = makePrefixAnnData();
   setNameComponent(data1, -3, name::Component::fromEscapedString("32=not-PA"));
-  BOOST_CHECK_THROW(PrefixAnnouncement pa1(data1), tlv::Error);
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data1}, tlv::Error, [] (const auto& e) {
+    return e.what() == "Data is not a prefix announcement: wrong name structure"s;
+  });
 
   // Name has no version component
   Data data2 = makePrefixAnnData();
   setNameComponent(data2, -2, "not-version");
-  BOOST_CHECK_THROW(PrefixAnnouncement pa2(data2), tlv::Error);
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data2}, tlv::Error, [] (const auto& e) {
+    return e.what() == "Data is not a prefix announcement: wrong name structure"s;
+  });
 
   // Name has no segment number component
   Data data3 = makePrefixAnnData();
   setNameComponent(data3, -2, "not-segment");
-  BOOST_CHECK_THROW(PrefixAnnouncement pa3(data3), tlv::Error);
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data3}, tlv::Error, [] (const auto& e) {
+    return e.what() == "Data is not a prefix announcement: wrong name structure"s;
+  });
+
+  // Data without Content
+  Data data4 = makePrefixAnnData();
+  data4.unsetContent();
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data4}, tlv::Error, [] (const auto& e) {
+    return e.what() == "Prefix announcement is empty"s;
+  });
 
   // Content has no ExpirationPeriod element
-  Data data4 = makePrefixAnnData();
-  Block payload4 = data4.getContent();
-  payload4.parse();
-  payload4.remove(tlv::nfd::ExpirationPeriod);
-  payload4.encode();
-  data4.setContent(payload4);
-  BOOST_CHECK_THROW(PrefixAnnouncement pa4(data4), tlv::Error);
-
-  // ExpirationPeriod is malformed
   Data data5 = makePrefixAnnData();
   Block payload5 = data5.getContent();
   payload5.parse();
   payload5.remove(tlv::nfd::ExpirationPeriod);
-  payload5.push_back("6D03010101"_block);
-  payload5.encode();
   data5.setContent(payload5);
-  BOOST_CHECK_THROW(PrefixAnnouncement pa5(data5), tlv::Error);
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data5}, tlv::Error, [] (const auto& e) {
+    return e.what() == "No sub-element of type 109 found in block of type 21"s;
+  });
 
-  // ValidityPeriod is malformed
+  // ExpirationPeriod is malformed
   Data data6 = makePrefixAnnData();
   Block payload6 = data6.getContent();
   payload6.parse();
-  payload6.remove(tlv::ValidityPeriod);
-  payload6.push_back("FD00FD00"_block);
-  payload6.encode();
+  payload6.remove(tlv::nfd::ExpirationPeriod);
+  payload6.push_back("6D03010101"_block);
   data6.setContent(payload6);
-  BOOST_CHECK_THROW(PrefixAnnouncement pa6(data6), tlv::Error);
+  BOOST_CHECK_THROW(PrefixAnnouncement{data6}, tlv::Error);
 
-  // Content has unrecognized critical element
+  // ValidityPeriod is malformed
   Data data7 = makePrefixAnnData();
   Block payload7 = data7.getContent();
   payload7.parse();
-  payload7.push_back("0200"_block);
-  payload7.encode();
+  payload7.remove(tlv::ValidityPeriod);
+  payload7.push_back("FD00FD00"_block);
   data7.setContent(payload7);
-  BOOST_CHECK_THROW(PrefixAnnouncement pa7(data7), tlv::Error);
+  BOOST_CHECK_THROW(PrefixAnnouncement{data7}, tlv::Error);
+
+  // Content has unrecognized critical element
+  Data data8 = makePrefixAnnData();
+  Block payload8 = data8.getContent();
+  payload8.parse();
+  payload8.push_back("0200"_block);
+  data8.setContent(payload8);
+  BOOST_CHECK_EXCEPTION(PrefixAnnouncement{data8}, tlv::Error, [] (const auto& e) {
+    return e.what() == "Unrecognized element of critical type 2"s;
+  });
 }
 
-BOOST_FIXTURE_TEST_CASE(EncodeEmpty, IdentityManagementFixture)
+BOOST_FIXTURE_TEST_CASE(EncodeEmpty, KeyChainFixture)
 {
   PrefixAnnouncement pa;
   BOOST_CHECK(!pa.getData());
@@ -157,7 +171,7 @@ BOOST_FIXTURE_TEST_CASE(EncodeEmpty, IdentityManagementFixture)
   BOOST_CHECK(!pa.getValidityPeriod());
 
   const Data& data = pa.toData(m_keyChain, signingWithSha256(), 5);
-  BOOST_CHECK_EQUAL(data.getName(), "/32=PA/%FD%05/%00%00");
+  BOOST_CHECK_EQUAL(data.getName(), "/32=PA/v=5/seg=0");
   BOOST_CHECK_EQUAL(data.getContentType(), tlv::ContentType_PrefixAnn);
   BOOST_REQUIRE(pa.getData());
   BOOST_CHECK_EQUAL(*pa.getData(), data);
@@ -170,7 +184,7 @@ BOOST_FIXTURE_TEST_CASE(EncodeEmpty, IdentityManagementFixture)
   BOOST_CHECK_EQUAL(pa, decoded);
 }
 
-BOOST_FIXTURE_TEST_CASE(EncodeNoValidity, IdentityManagementFixture)
+BOOST_FIXTURE_TEST_CASE(EncodeNoValidity, KeyChainFixture)
 {
   PrefixAnnouncement pa;
   pa.setAnnouncedName("/net/example");
@@ -178,7 +192,7 @@ BOOST_FIXTURE_TEST_CASE(EncodeNoValidity, IdentityManagementFixture)
   pa.setExpiration(1_h);
 
   const Data& data = pa.toData(m_keyChain, signingWithSha256(), 1);
-  BOOST_CHECK_EQUAL(data.getName(), "/net/example/32=PA/%FD%01/%00%00");
+  BOOST_CHECK_EQUAL(data.getName(), "/net/example/32=PA/v=1/seg=0");
   BOOST_CHECK_EQUAL(data.getContentType(), tlv::ContentType_PrefixAnn);
 
   const Block& payload = data.getContent();
@@ -194,7 +208,7 @@ BOOST_FIXTURE_TEST_CASE(EncodeNoValidity, IdentityManagementFixture)
   BOOST_CHECK_EQUAL(pa, decoded);
 }
 
-BOOST_FIXTURE_TEST_CASE(EncodeWithValidity, IdentityManagementFixture)
+BOOST_FIXTURE_TEST_CASE(EncodeWithValidity, KeyChainFixture)
 {
   PrefixAnnouncement pa;
   pa.setAnnouncedName("/net/example");

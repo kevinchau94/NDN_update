@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-#
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
 
@@ -20,13 +18,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'NDN Essential Tools'
-copyright = u'Copyright © 2014-2019 Named Data Networking Project.'
+copyright = u'Copyright © 2014-2021 Named Data Networking Project.'
 author = u'Named Data Networking Project'
 
-# The short X.Y version
+# The short X.Y version.
 #version = ''
 
-# The full version, including alpha/beta/rc tags
+# The full version, including alpha/beta/rc tags.
 #release = ''
 
 # There are two options for replacing |today|: either, you set today to some
@@ -40,7 +38,7 @@ today_fmt = '%Y-%m-%d'
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '1.1'
+needs_sphinx = '1.3'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -51,19 +49,27 @@ extensions = [
 # The master toctree document.
 master_doc = 'index'
 
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This pattern also affects html_static_path and html_extra_path.
+exclude_patterns = ['Thumbs.db', '.DS_Store']
+
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('ndnpeek',         'ndnpeek',          'simple consumer to send one Interest and expect one Data', [], 1),
-    ('ndnpoke',         'ndnpoke',          'simple producer to publish one Data',          [], 1),
-    ('ndnping',         'ndnping',          'reachability testing client',                  [], 1),
-    ('ndnpingserver',   'ndnpingserver',    'reachability testing server',                  [], 1),
-    ('ndnputchunks',    'ndnputchunks',     'producer program with content segmentation',   [], 1),
-    ('ndndump',         'ndndump',          'traffic analysis tool',                        [], 8),
-    ('ndn-dissect',     'ndn-dissect',      'NDN packet format inspector',                  [], 1),
+    ('ndnpeek',       'ndnpeek',       'simple consumer to send one Interest and receive one Data', [], 1),
+    ('ndnpoke',       'ndnpoke',       'simple producer to publish one Data',        [], 1),
+    ('ndnping',       'ndnping',       'reachability testing client',                [], 1),
+    ('ndnpingserver', 'ndnpingserver', 'reachability testing server',                [], 1),
+    ('ndnputchunks',  'ndnputchunks',  'producer program with content segmentation', [], 1),
+    ('ndndump',       'ndndump',       'traffic analysis tool',                      [], 8),
+    ('ndn-dissect',   'ndn-dissect',   'NDN packet format inspector',                [], 1),
 ]
 
 # If true, show URL addresses after external links.

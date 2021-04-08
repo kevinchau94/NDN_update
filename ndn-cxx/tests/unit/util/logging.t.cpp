@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2020 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -23,9 +23,13 @@
 #include "ndn-cxx/util/logger.hpp"
 
 #include "tests/boost-test.hpp"
-#include "tests/unit/unit-test-time-fixture.hpp"
+#include "tests/unit/clock-fixture.hpp"
 
+#if BOOST_VERSION >= 105900
+#include <boost/test/tools/output_test_stream.hpp>
+#else
 #include <boost/test/output_test_stream.hpp>
+#endif
 
 namespace ndn {
 namespace util {
@@ -103,6 +107,38 @@ private:
 
 NDN_LOG_MEMBER_INIT(ClassWithLogger, ndn.util.tests.ClassWithLogger);
 
+class AbstractClassWithLogger
+{
+public:
+  virtual
+  ~AbstractClassWithLogger() = default;
+
+  void
+  logFromConstMemberFunction() const
+  {
+    NDN_LOG_INFO("const member function");
+  }
+
+  virtual void
+  logFromVirtualFunction() = 0;
+
+protected:
+  NDN_LOG_MEMBER_DECL();
+};
+
+// Check that the macro can cope with abstract types
+NDN_LOG_MEMBER_INIT(AbstractClassWithLogger, ndn.util.tests.AbstractClassWithLogger);
+
+class DerivedClass : public AbstractClassWithLogger
+{
+public:
+  void
+  logFromVirtualFunction() final
+  {
+    NDN_LOG_INFO("overridden virtual function");
+  }
+};
+
 template<class T, class U>
 class ClassTemplateWithLogger
 {
@@ -133,14 +169,14 @@ NDN_LOG_MEMBER_INIT_SPECIALIZED((ClassTemplateWithLogger<int, std::string>), ndn
 const time::microseconds LOG_SYSTIME(1468108800311239LL);
 const std::string LOG_SYSTIME_STR("1468108800.311239");
 
-class LoggingFixture : public ndn::tests::UnitTestTimeFixture
+class LoggingFixture : public ndn::tests::ClockFixture
 {
 protected:
   LoggingFixture()
     : m_oldEnabledLevel(Logging::get().getLevels())
     , m_oldDestination(Logging::get().getDestination())
   {
-    this->systemClock->setNow(LOG_SYSTIME);
+    m_systemClock->setNow(LOG_SYSTIME);
     Logging::get().resetLevels();
     Logging::setDestination(os);
   }
@@ -301,11 +337,13 @@ BOOST_AUTO_TEST_CASE(NamespaceLogger)
 BOOST_AUTO_TEST_CASE(MemberLogger)
 {
   Logging::setLevel("ndn.util.tests.ClassWithLogger", LogLevel::INFO);
+  Logging::setLevel("ndn.util.tests.AbstractClassWithLogger", LogLevel::INFO);
   Logging::setLevel("ndn.util.tests.Specialized1", LogLevel::INFO);
   // ndn.util.tests.Specialized2 is not enabled
 
   const auto& names = Logging::getLoggerNames();
   BOOST_CHECK_EQUAL(names.count("ndn.util.tests.ClassWithLogger"), 1);
+  BOOST_CHECK_EQUAL(names.count("ndn.util.tests.AbstractClassWithLogger"), 1);
   BOOST_CHECK_EQUAL(names.count("ndn.util.tests.Specialized1"), 1);
   BOOST_CHECK_EQUAL(names.count("ndn.util.tests.Specialized2"), 1);
 
@@ -316,6 +354,15 @@ BOOST_AUTO_TEST_CASE(MemberLogger)
   BOOST_CHECK(os.is_equal(
     LOG_SYSTIME_STR + "  INFO: [ndn.util.tests.ClassWithLogger] static member function\n" +
     LOG_SYSTIME_STR + "  INFO: [ndn.util.tests.ClassWithLogger] const member function\n"
+    ));
+
+  DerivedClass{}.logFromConstMemberFunction();
+  DerivedClass{}.logFromVirtualFunction();
+
+  Logging::flush();
+  BOOST_CHECK(os.is_equal(
+    LOG_SYSTIME_STR + "  INFO: [ndn.util.tests.AbstractClassWithLogger] const member function\n" +
+    LOG_SYSTIME_STR + "  INFO: [ndn.util.tests.AbstractClassWithLogger] overridden virtual function\n"
     ));
 
   ClassTemplateWithLogger<int, double>::logFromStaticMemberFunction();
@@ -646,7 +693,7 @@ BOOST_AUTO_TEST_CASE(ChangeDestination)
   BOOST_CHECK(os2weak.expired());
 }
 
-BOOST_AUTO_TEST_CASE(SetNullptrDestination)
+BOOST_AUTO_TEST_CASE(NullDestination)
 {
   Logging::setDestination(nullptr);
   logFromModule1();

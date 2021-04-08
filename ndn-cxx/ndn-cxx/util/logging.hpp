@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_UTIL_LOGGING_HPP
-#define NDN_UTIL_LOGGING_HPP
+#ifndef NDN_CXX_UTIL_LOGGING_HPP
+#define NDN_CXX_UTIL_LOGGING_HPP
 
 #include "ndn-cxx/detail/common.hpp"
 
@@ -97,12 +97,13 @@ public:
   /** \brief Helper method to set stream log destination.
    *  \param os a stream for log output; caller must ensure it remains valid
    *            until setDestination() is invoked again or program exits
+   *  \param wantAutoFlush if true, the created logging sink will be auto-flushed
    *`
    *  This is equivalent to `setDestination(makeDefaultStreamDestination(shared_ptr<std::ostream>(&os, nullDeleter)))`.
    *
    */
   static void
-  setDestination(std::ostream& os);
+  setDestination(std::ostream& os, bool wantAutoFlush = true);
 
   /** \brief Flush log backend.
    *
@@ -114,7 +115,7 @@ public:
   /** \brief Create stream log destination using default formatting
    */
   static boost::shared_ptr<boost::log::sinks::sink>
-  makeDefaultStreamDestination(shared_ptr<std::ostream> os);
+  makeDefaultStreamDestination(shared_ptr<std::ostream> os, bool wantAutoFlush = true);
 
 private:
   Logging();
@@ -221,4 +222,4 @@ Logging::flush()
 
 #endif // HAVE_NDN_CXX_CUSTOM_LOGGER
 
-#endif // NDN_UTIL_LOGGING_HPP
+#endif // NDN_CXX_UTIL_LOGGING_HPP

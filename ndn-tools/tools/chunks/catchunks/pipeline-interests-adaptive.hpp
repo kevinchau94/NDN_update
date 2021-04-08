@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016-2019, Regents of the University of California,
+ * Copyright (c) 2016-2021, Regents of the University of California,
  *                          Colorado State University,
  *                          University Pierre & Marie Curie, Sorbonne University.
  *
@@ -29,10 +29,10 @@
 #ifndef NDN_TOOLS_CHUNKS_CATCHUNKS_PIPELINE_INTERESTS_ADAPTIVE_HPP
 #define NDN_TOOLS_CHUNKS_CATCHUNKS_PIPELINE_INTERESTS_ADAPTIVE_HPP
 
-#include "options.hpp"
 #include "pipeline-interests.hpp"
 
 #include <ndn-cxx/util/rtt-estimator.hpp>
+#include <ndn-cxx/util/signal.hpp>
 
 #include <queue>
 #include <unordered_map>
@@ -41,29 +41,6 @@ namespace ndn {
 namespace chunks {
 
 using util::RttEstimatorWithStats;
-
-class PipelineInterestsAdaptiveOptions : public Options
-{
-public:
-  explicit
-  PipelineInterestsAdaptiveOptions(const Options& options = Options())
-    : Options(options)
-  {
-  }
-
-public:
-  double initCwnd = 1.0; ///< initial congestion window size
-  double initSsthresh = std::numeric_limits<double>::max(); ///< initial slow start threshold
-  double aiStep = 1.0; ///< additive increase step (in segments)
-  double mdCoef = 0.5; ///< multiplicative decrease coefficient
-  time::milliseconds rtoCheckInterval{10}; ///< interval for checking retransmission timer
-  bool disableCwa = false; ///< disable Conservative Window Adaptation
-  bool resetCwndToInit = false; ///< reduce cwnd to initCwnd when loss event occurs
-  bool ignoreCongMarks = false; ///< disable window decrease after congestion marks
-};
-
-std::ostream&
-operator<<(std::ostream& os, const PipelineInterestsAdaptiveOptions& options);
 
 /**
  * @brief indicates the state of the segment
@@ -102,17 +79,13 @@ struct SegmentInfo
 class PipelineInterestsAdaptive : public PipelineInterests
 {
 public:
-  using Options = PipelineInterestsAdaptiveOptions;
-
-public:
   /**
    * @brief Constructor.
    *
    * Configures the pipelining service without specifying the retrieval namespace. After this
    * configuration the method run must be called to start the Pipeline.
    */
-  PipelineInterestsAdaptive(Face& face, RttEstimatorWithStats& rttEstimator,
-                            const Options& options = Options());
+  PipelineInterestsAdaptive(Face& face, RttEstimatorWithStats& rttEstimator, const Options& opts);
 
   ~PipelineInterestsAdaptive() override;
 
@@ -122,7 +95,7 @@ public:
    * The callback function should be: `void(nanoseconds age, double cwnd)`, where `age` is the
    * time since the pipeline started and `cwnd` is the new congestion window size (in segments).
    */
-  signal::Signal<PipelineInterestsAdaptive, time::nanoseconds, double> afterCwndChange;
+  util::Signal<PipelineInterestsAdaptive, time::nanoseconds, double> afterCwndChange;
 
   struct RttSample
   {
@@ -136,10 +109,13 @@ public:
   /**
    * @brief Signals when a new RTT sample has been taken.
    */
-  signal::Signal<PipelineInterestsAdaptive, RttSample> afterRttMeasurement;
+  util::Signal<PipelineInterestsAdaptive, RttSample> afterRttMeasurement;
 
 protected:
   DECLARE_SIGNAL_EMIT(afterCwndChange)
+
+  void
+  printOptions() const;
 
 private:
   /**
@@ -214,13 +190,12 @@ PUBLIC_WITH_TESTS_ELSE_PRIVATE:
 
 PUBLIC_WITH_TESTS_ELSE_PROTECTED:
   static constexpr double MIN_SSTHRESH = 2.0;
-  const Options m_options;
 
   double m_cwnd; ///< current congestion window size (in segments)
   double m_ssthresh; ///< current slow start threshold
+  RttEstimatorWithStats& m_rttEstimator;
 
 PUBLIC_WITH_TESTS_ELSE_PRIVATE:
-  RttEstimatorWithStats& m_rttEstimator;
   Scheduler m_scheduler;
   scheduler::ScopedEventId m_checkRtoEvent;
 

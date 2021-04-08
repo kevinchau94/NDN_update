@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2020 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -21,10 +21,9 @@
 
 #include "ndn-cxx/lp/packet.hpp"
 #include "ndn-cxx/prefix-announcement.hpp"
-#include "ndn-cxx/security/signature-sha256-with-rsa.hpp"
 
-#include "tests/boost-test.hpp"
-#include "tests/identity-management-fixture.hpp"
+#include "tests/key-chain-fixture.hpp"
+#include "tests/test-common.hpp"
 
 namespace ndn {
 namespace lp {
@@ -428,18 +427,13 @@ BOOST_AUTO_TEST_CASE(DecodeUnrecognizedTlvType)
   BOOST_CHECK_THROW(packet.wireDecode(wire), Packet::Error);
 }
 
-BOOST_FIXTURE_TEST_CASE(DecodePrefixAnnouncement, ndn::tests::IdentityManagementFixture)
+BOOST_FIXTURE_TEST_CASE(DecodePrefixAnnouncement, ndn::tests::KeyChainFixture)
 {
   // Construct Data which prefix announcement is attached to
-  Data data0("/edu/ua/cs/news/index.html");
-  ndn::SignatureSha256WithRsa fakeSignature;
-  fakeSignature.setValue(ndn::encoding::makeEmptyBlock(ndn::tlv::SignatureValue));
-  data0.setSignature(fakeSignature);
+  auto data0 = ndn::tests::makeData("/edu/ua/cs/news/index.html");
 
-  Block wire;
-  wire = data0.wireEncode();
   Packet packet0;
-  packet0.wireDecode(wire);
+  packet0.wireDecode(data0->wireEncode());
 
   // Construct Prefix Announcement
   PrefixAnnouncement pa;

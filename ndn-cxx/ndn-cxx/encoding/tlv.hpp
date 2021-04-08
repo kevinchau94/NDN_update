@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,15 +19,14 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_ENCODING_TLV_HPP
-#define NDN_ENCODING_TLV_HPP
+#ifndef NDN_CXX_ENCODING_TLV_HPP
+#define NDN_CXX_ENCODING_TLV_HPP
 
 #include "ndn-cxx/detail/common.hpp"
 
 #include <cstring>
 #include <iterator>
 #include <ostream>
-#include <type_traits>
 #include <vector>
 
 #include <boost/endian/conversion.hpp>
@@ -75,6 +74,8 @@ enum : uint32_t {
   InterestLifetime                = 12,
   HopLimit                        = 34,
   ApplicationParameters           = 36,
+  InterestSignatureInfo           = 44,
+  InterestSignatureValue          = 46,
   MetaInfo                        = 20,
   Content                         = 21,
   SignatureInfo                   = 22,
@@ -85,6 +86,9 @@ enum : uint32_t {
   SignatureType                   = 27,
   KeyLocator                      = 28,
   KeyDigest                       = 29,
+  SignatureNonce                  = 38,
+  SignatureTime                   = 40,
+  SignatureSeqNum                 = 42,
   LinkDelegation                  = 31,
   LinkPreference                  = 30,
 
@@ -108,9 +112,6 @@ enum : uint32_t {
   Any                       = 19,
 };
 
-[[deprecated("use GenericNameComponent")]]
-constexpr int NameComponent = GenericNameComponent;
-
 /** @brief TLV-TYPE numbers for typed name components.
  *  @sa https://redmine.named-data.net/projects/ndn-tlv/wiki/NameComponentType
  */
@@ -125,18 +126,20 @@ enum : uint32_t {
 
 /** @brief SignatureType values
  *  @sa https://named-data.net/doc/NDN-packet-spec/current/signature.html
+ *  @sa https://redmine.named-data.net/projects/ndn-tlv/wiki/SignatureType
  */
 enum SignatureTypeValue : uint16_t {
   DigestSha256             = 0,
   SignatureSha256WithRsa   = 1,
   SignatureSha256WithEcdsa = 3,
   SignatureHmacWithSha256  = 4,
+  NullSignature            = 200,
 };
 
 std::ostream&
 operator<<(std::ostream& os, SignatureTypeValue st);
 
-/** @brief TLV-TYPE numbers for SignatureInfo features
+/** @brief TLV-TYPE numbers for SignatureInfo extensions
  *  @sa docs/specs/certificate-format.rst
  */
 enum {
@@ -533,4 +536,4 @@ writeNonNegativeInteger(std::ostream& os, uint64_t integer)
 } // namespace tlv
 } // namespace ndn
 
-#endif // NDN_ENCODING_TLV_HPP
+#endif // NDN_CXX_ENCODING_TLV_HPP

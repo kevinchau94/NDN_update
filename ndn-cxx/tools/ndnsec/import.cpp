@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -23,8 +23,8 @@
 #include "util.hpp"
 
 #include "ndn-cxx/security/impl/openssl.hpp"
-
-#include <boost/scope_exit.hpp>
+#include "ndn-cxx/util/io.hpp"
+#include "ndn-cxx/util/scope.hpp"
 
 namespace ndn {
 namespace ndnsec {
@@ -37,9 +37,9 @@ ndnsec_import(int argc, char** argv)
   std::string input;
   std::string password;
 
-  BOOST_SCOPE_EXIT(&password) {
+  auto guard = make_scope_exit([&password] {
     OPENSSL_cleanse(&password.front(), password.size());
-  } BOOST_SCOPE_EXIT_END
+  });
 
   po::options_description description(
     "Usage: ndnsec import [-h] [-P PASSPHRASE] [-i] FILE\n"
@@ -72,7 +72,7 @@ ndnsec_import(int argc, char** argv)
     return 0;
   }
 
-  security::v2::KeyChain keyChain;
+  KeyChain keyChain;
 
   shared_ptr<security::SafeBag> safeBag;
   if (input == "-")

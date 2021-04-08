@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California,
+ * Copyright (c) 2013-2021 Regents of the University of California,
  *                         Arizona Board of Regents,
  *                         Colorado State University,
  *                         University Pierre & Marie Curie, Sorbonne University,
@@ -27,6 +27,8 @@
 
 #ifndef NDN_NET_FACE_URI_HPP
 #define NDN_NET_FACE_URI_HPP
+#ifndef NDN_CXX_NET_FACE_URI_HPP
+#define NDN_CXX_NET_FACE_URI_HPP
 
 #include "ndn-cxx/detail/asio-fwd.hpp"
 #include "ndn-cxx/net/ethernet.hpp"
@@ -208,4 +210,4 @@ operator<<(std::ostream& os, const FaceUri& uri);
 
 } // namespace ndn
 
-#endif // NDN_NET_FACE_URI_HPP
+#endif // NDN_CXX_NET_FACE_URI_HPP

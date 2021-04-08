@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
-set -e
-
-JDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "$JDIR"/util.sh
-
-set -x
+set -ex
 
 if [[ $JOB_NAME == *"code-coverage" ]]; then
     gcovr --object-directory=build \
@@ -28,7 +23,6 @@ if [[ $JOB_NAME == *"code-coverage" ]]; then
 
     genhtml --branch-coverage \
             --demangle-cpp \
-            --frames \
             --legend \
             --output-directory build/coverage \
             --title "ndn-cxx unit tests" \

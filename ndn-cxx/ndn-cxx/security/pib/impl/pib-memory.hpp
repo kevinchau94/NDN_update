@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_SECURITY_PIB_IMPL_PIB_MEMORY_HPP
-#define NDN_SECURITY_PIB_IMPL_PIB_MEMORY_HPP
+#ifndef NDN_CXX_SECURITY_PIB_IMPL_PIB_MEMORY_HPP
+#define NDN_CXX_SECURITY_PIB_IMPL_PIB_MEMORY_HPP
 
 #include "ndn-cxx/security/pib/pib-impl.hpp"
 
@@ -103,12 +103,12 @@ public: // Certificate management
   hasCertificate(const Name& certName) const override;
 
   void
-  addCertificate(const v2::Certificate& certificate) override;
+  addCertificate(const Certificate& certificate) override;
 
   void
   removeCertificate(const Name& certName) override;
 
-  v2::Certificate
+  Certificate
   getCertificate(const Name& certName) const override;
 
   std::set<Name>
@@ -117,7 +117,7 @@ public: // Certificate management
   void
   setDefaultCertificateOfKey(const Name& keyName, const Name& certName) override;
 
-  v2::Certificate
+  Certificate
   getDefaultCertificateOfKey(const Name& keyName) const override;
 
 private:
@@ -138,11 +138,11 @@ private:
   std::map<Name, Name> m_defaultCerts;
 
   /// @brief certificate Name => certificate
-  std::map<Name, v2::Certificate> m_certs;
+  std::map<Name, Certificate> m_certs;
 };
 
 } // namespace pib
 } // namespace security
 } // namespace ndn
 
-#endif // NDN_SECURITY_PIB_IMPL_PIB_MEMORY_HPP
+#endif // NDN_CXX_SECURITY_PIB_IMPL_PIB_MEMORY_HPP

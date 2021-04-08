@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_SECURITY_TPM_KEY_HANDLE_HPP
-#define NDN_SECURITY_TPM_KEY_HANDLE_HPP
+#ifndef NDN_CXX_SECURITY_TPM_KEY_HANDLE_HPP
+#define NDN_CXX_SECURITY_TPM_KEY_HANDLE_HPP
 
 #include "ndn-cxx/name.hpp"
 #include "ndn-cxx/security/security-common.hpp"
@@ -48,20 +48,33 @@ public:
   ~KeyHandle();
 
   /**
-   * @return a digital signature created on @p buf using this key with @p digestAlgorithm.
+   * @brief Generate a digital signature for @p bufs using this key with @p digestAlgorithm.
+   */
+  ConstBufferPtr
+  sign(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs) const;
+
+  /**
+   * @brief Generate a digital signature for @p buf using this key with @p digestAlgorithm.
    */
   ConstBufferPtr
   sign(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t size) const;
 
   /**
-   * @brief Verify the signature @p sig created on @p buf using this key and @p digestAlgorithm.
+   * @brief Verify the signature @p sig for @p bufs using this key and @p digestAlgorithm.
+   */
+  bool
+  verify(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs,
+         const uint8_t* sig, size_t sigLen) const;
+
+  /**
+   * @brief Verify the signature @p sig for @p buf using this key and @p digestAlgorithm.
    */
   bool
   verify(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t bufLen,
          const uint8_t* sig, size_t sigLen) const;
 
   /**
-   * @return plain text content decrypted from @p cipherText using this key.
+   * @brief Return plain text content decrypted from @p cipherText using this key.
    */
   ConstBufferPtr
   decrypt(const uint8_t* cipherText, size_t cipherTextLen) const;
@@ -86,10 +99,10 @@ public:
 
 private:
   virtual ConstBufferPtr
-  doSign(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t size) const = 0;
+  doSign(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs) const = 0;
 
   virtual bool
-  doVerify(DigestAlgorithm digestAlgorithm, const uint8_t* buf, size_t bufLen,
+  doVerify(DigestAlgorithm digestAlgorithm, const InputBuffers& bufs,
            const uint8_t* sig, size_t sigLen) const = 0;
 
   virtual ConstBufferPtr
@@ -106,4 +119,4 @@ private:
 } // namespace security
 } // namespace ndn
 
-#endif // NDN_SECURITY_TPM_KEY_HANDLE_HPP
+#endif // NDN_CXX_SECURITY_TPM_KEY_HANDLE_HPP

@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California,
+ * Copyright (c) 2013-2020 Regents of the University of California,
  *                         Arizona Board of Regents,
  *                         Colorado State University,
  *                         University Pierre & Marie Curie, Sorbonne University,
@@ -29,10 +29,11 @@
 #include "ndn-cxx/net/dns.hpp"
 #include "ndn-cxx/util/string-helper.hpp"
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/mpl/vector.hpp>
 #include <boost/mpl/for_each.hpp>
+#include <boost/mpl/vector.hpp>
 
 #include <regex>
 #include <set>
@@ -187,7 +188,7 @@ FaceUri::fromLora(const std::string& idConnections)
 {
   FaceUri uri;
   uri.m_scheme = "lora";
-  uri.m_host = "";
+  uri.m_host = "lora_host";
   return uri;
 }
 
@@ -719,7 +720,7 @@ FaceUri::canonize(const CanonizeSuccessCallback& onSuccess,
                   boost::asio::io_service& io, time::nanoseconds timeout) const
 {
 
-  static CanonizeProviderTable providerTable;
+    static CanonizeProviderTable providerTable;
   if (providerTable.empty()) {
     boost::mpl::for_each<CanonizeProviders>(CanonizeProviderTableInitializer(providerTable));
     BOOST_ASSERT(!providerTable.empty());

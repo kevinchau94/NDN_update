@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2014-2019,  Regents of the University of California,
+ * Copyright (c) 2014-2021,  Regents of the University of California,
  *                           Arizona Board of Regents,
  *                           Colorado State University,
  *                           University Pierre & Marie Curie, Sorbonne University,
@@ -37,11 +37,10 @@ namespace asf {
 
 /** \brief Adaptive SRTT-based Forwarding Strategy
  *
- *  \see Vince Lehman, Ashlesh Gawande, Rodrigo Aldecoa, Dmitri Krioukov, Beichuan Zhang, Lixia Zhang, and Lan Wang,
- *       "An Experimental Investigation of Hyperbolic Routing with a Smart Forwarding Plane in NDN,"
- *       NDN Technical Report NDN-0042, 2016. http://named-data.net/techreports.html
- *
- *  \note This strategy is not EndpointId-aware.
+ *  \see Vince Lehman, Ashlesh Gawande, Rodrigo Aldecoa, Dmitri Krioukov, Beichuan Zhang,
+ *       Lixia Zhang, and Lan Wang, "An Experimental Investigation of Hyperbolic Routing
+ *       with a Smart Forwarding Plane in NDN", NDN Technical Report NDN-0042, 2016.
+ *       https://named-data.net/publications/techreports/ndn-0042-1-asf/
  */
 class AsfStrategy : public Strategy
 {
@@ -69,9 +68,9 @@ private:
   void
   processParams(const PartialName& parsed);
 
-  void
+  pit::OutRecord*
   forwardInterest(const Interest& interest, Face& outFace, const fib::Entry& fibEntry,
-                  const shared_ptr<pit::Entry>& pitEntry, bool wantNewNonce = false);
+                  const shared_ptr<pit::Entry>& pitEntry);
 
   void
   sendProbe(const Interest& interest, const FaceEndpoint& ingress, const Face& faceToUse,
@@ -83,16 +82,16 @@ private:
                            bool isNewInterest = true);
 
   void
-  onTimeout(const Name& interestName, FaceId faceId);
+  onTimeoutOrNack(const Name& interestName, FaceId faceId, bool isNack);
 
   void
-  sendNoRouteNack(const FaceEndpoint& ingress, const shared_ptr<pit::Entry>& pitEntry);
+  sendNoRouteNack(Face& face, const shared_ptr<pit::Entry>& pitEntry);
 
 private:
   AsfMeasurements m_measurements;
   ProbingModule m_probing;
   RetxSuppressionExponential m_retxSuppression;
-  size_t m_maxSilentTimeouts = 0;
+  size_t m_nMaxSilentTimeouts = 3;
 
   static const time::milliseconds RETX_SUPPRESSION_INITIAL;
   static const time::milliseconds RETX_SUPPRESSION_MAX;

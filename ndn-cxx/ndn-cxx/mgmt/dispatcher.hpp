@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_MGMT_DISPATCHER_HPP
-#define NDN_MGMT_DISPATCHER_HPP
+#ifndef NDN_CXX_MGMT_DISPATCHER_HPP
+#define NDN_CXX_MGMT_DISPATCHER_HPP
 
 #include "ndn-cxx/face.hpp"
 #include "ndn-cxx/encoding/block.hpp"
@@ -151,17 +151,16 @@ public:
    *
    *  Procedure for adding a top-level prefix:
    *  1. if the new top-level prefix overlaps with an existing top-level prefix
-   *     (one top-level prefix is a prefix of another top-level prefix), throw std::domain_error
-   *  2. if wantRegister is true, invoke face.registerPrefix for the top-level prefix;
+   *     (one top-level prefix is a prefix of another top-level prefix), throw std::domain_error.
+   *  2. if \p wantRegister is true, invoke Face::registerPrefix for the top-level prefix;
    *     the returned RegisteredPrefixHandle shall be recorded internally, indexed by the top-level
-   *     prefix
-   *  3. foreach relPrefix from ControlCommands and StatusDatasets,
-   *     join the top-level prefix with the relPrefix to obtain the full prefix,
-   *     and invoke non-registering overload of face.setInterestFilter,
+   *     prefix.
+   *  3. for each `relPrefix` from ControlCommands and StatusDatasets,
+   *     join the top-level prefix with `relPrefix` to obtain the full prefix,
+   *     and invoke non-registering overload of Face::setInterestFilter,
    *     with the InterestHandler set to an appropriate private method to handle incoming Interests
-   *     for the ControlCommand or StatusDataset;
-   *     the returned InterestFilterHandle shall be recorded internally, indexed by the top-level
-   *     prefix
+   *     for the ControlCommand or StatusDataset; the returned InterestFilterHandle shall be
+   *     recorded internally, indexed by the top-level prefix.
    */
   void
   addTopPrefix(const Name& prefix, bool wantRegister = true,
@@ -171,9 +170,9 @@ public:
    *  \param prefix a top-level prefix, e.g., "/localhost/nfd"
    *
    *  Procedure for removing a top-level prefix:
-   *  1. if the top-level prefix has not been added, abort these steps
-   *  2. if the top-level prefix has been added with wantRegister, unregister the prefix
-   *  3. unset each Interest filter recorded during addTopPrefix,
+   *  1. if the top-level prefix has not been added, abort these steps.
+   *  2. if the top-level prefix has been added with `wantRegister`, unregister the prefix.
+   *  3. clear all Interest filters set during addTopPrefix().
    */
   void
   removeTopPrefix(const Name& prefix);
@@ -324,21 +323,20 @@ private:
    * @brief send data to the face and/or in-memory storage
    *
    * Create a Data packet with the given @p dataName, @p content, and @p metaInfo,
-   * set its FreshnessPeriod to DEFAULT_FRESHNESS_PERIOD, and then send it out through
-   * the face and/or insert it into the in-memory storage as specified in @p destination.
+   * set its FreshnessPeriod to 1 second, and then send it out through the face
+   * and/or insert it into the in-memory storage as specified by @p destination.
    *
    * If it's toward the in-memory storage, set its CachePolicy to NO_CACHE and limit
-   * its FreshnessPeriod in the storage to @p imsFresh.
+   * its FreshnessPeriod in the storage to 1 second.
    *
    * @param dataName the name of this piece of data
    * @param content the content of this piece of data
    * @param metaInfo some meta information of this piece of data
    * @param destination where to send this piece of data
-   * @param imsFresh freshness period of this piece of data in in-memory storage
    */
   void
   sendData(const Name& dataName, const Block& content, const MetaInfo& metaInfo,
-           SendDestination destination, time::milliseconds imsFresh);
+           SendDestination destination);
 
   /**
    * @brief send out a data packt through the face
@@ -424,12 +422,10 @@ private:
    *
    * @param dataName the name of this piece of data
    * @param content the content of this piece of data
-   * @param imsFresh the freshness period of this piece of data in the in-memory storage
    * @param isFinalBlock indicates whether this piece of data is the final block
    */
   void
-  sendStatusDatasetSegment(const Name& dataName, const Block& content,
-                           time::milliseconds imsFresh, bool isFinalBlock);
+  sendStatusDatasetSegment(const Name& dataName, const Block& content, bool isFinalBlock);
 
   void
   postNotification(const Block& notification, const PartialName& relPrefix);
@@ -489,4 +485,4 @@ Dispatcher::addControlCommand(const PartialName& relPrefix,
 } // namespace mgmt
 } // namespace ndn
 
-#endif // NDN_MGMT_DISPATCHER_HPP
+#endif // NDN_CXX_MGMT_DISPATCHER_HPP

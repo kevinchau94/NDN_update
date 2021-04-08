@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2016-2019, Regents of the University of California,
+ * Copyright (c) 2016-2021, Regents of the University of California,
  *                          Colorado State University,
  *                          University Pierre & Marie Curie, Sorbonne University.
  *
@@ -29,12 +29,16 @@
  */
 
 #include "pipeline-interests.hpp"
+#include "data-fetcher.hpp"
+
+#include <boost/asio/io_service.hpp>
 
 namespace ndn {
 namespace chunks {
 
-PipelineInterests::PipelineInterests(Face& face)
-  : m_face(face)
+PipelineInterests::PipelineInterests(Face& face, const Options& opts)
+  : m_options(opts)
+  , m_face(face)
   , m_hasFinalBlockId(false)
   , m_lastSegmentNo(0)
   , m_nReceived(0)
@@ -49,8 +53,10 @@ PipelineInterests::~PipelineInterests() = default;
 void
 PipelineInterests::run(const Name& versionedName, DataCallback dataCb, FailureCallback failureCb)
 {
-  BOOST_ASSERT(!versionedName.empty() && versionedName[-1].isVersion());
+  BOOST_ASSERT(m_options.disableVersionDiscovery ||
+               (!versionedName.empty() && versionedName[-1].isVersion()));
   BOOST_ASSERT(dataCb != nullptr);
+
   m_prefix = versionedName;
   m_onData = std::move(dataCb);
   m_onFailure = std::move(failureCb);
@@ -106,6 +112,31 @@ PipelineInterests::onFailure(const std::string& reason)
     m_face.getIoService().post([this, reason] { m_onFailure(reason); });
 }
 
+void
+PipelineInterests::printOptions() const
+{
+  std::cerr << "Pipeline parameters:\n"
+            << "\tRequest fresh content = " << (m_options.mustBeFresh ? "yes" : "no") << "\n"
+            << "\tInterest lifetime = " << m_options.interestLifetime << "\n"
+            << "\tMax retries on timeout or Nack = " <<
+               (m_options.maxRetriesOnTimeoutOrNack == DataFetcher::MAX_RETRIES_INFINITE ?
+                  "infinite" : to_string(m_options.maxRetriesOnTimeoutOrNack)) << "\n";
+}
+
+void
+PipelineInterests::printSummary() const
+{
+  using namespace ndn::time;
+  duration<double, seconds::period> timeElapsed = steady_clock::now() - getStartTime();
+  double throughput = 8 * m_receivedSize / timeElapsed.count();
+
+  std::cerr << "\n\nAll segments have been received.\n"
+            << "Time elapsed: " << timeElapsed << "\n"
+            << "Segments received: " << m_nReceived << "\n"
+            << "Transferred size: " << m_receivedSize / 1e3 << " kB" << "\n"
+            << "Goodput: " << formatThroughput(throughput) << "\n";
+}
+
 std::string
 PipelineInterests::formatThroughput(double throughput)
 {
@@ -127,20 +158,6 @@ PipelineInterests::formatThroughput(double throughput)
       return to_string(throughput) + " Tbit/s";
   }
   return "";
-}
-
-void
-PipelineInterests::printSummary() const
-{
-  using namespace ndn::time;
-  duration<double, seconds::period> timeElapsed = steady_clock::now() - getStartTime();
-  double throughput = 8 * m_receivedSize / timeElapsed.count();
-
-  std::cerr << "\n\nAll segments have been received.\n"
-            << "Time elapsed: " << timeElapsed << "\n"
-            << "Segments received: " << m_nReceived << "\n"
-            << "Transferred size: " << m_receivedSize / 1e3 << " kB" << "\n"
-            << "Goodput: " << formatThroughput(throughput) << "\n";
 }
 
 } // namespace chunks

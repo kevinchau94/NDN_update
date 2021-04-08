@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * Copyright (c) 2013-2019 Regents of the University of California.
+ * Copyright (c) 2013-2021 Regents of the University of California.
  *
  * This file is part of ndn-cxx library (NDN C++ library with eXperimental eXtensions).
  *
@@ -22,6 +22,7 @@
 #include "ndnsec.hpp"
 #include "util.hpp"
 
+#include "ndn-cxx/security/additional-description.hpp"
 #include "ndn-cxx/security/transform/base64-encode.hpp"
 #include "ndn-cxx/security/transform/buffer-source.hpp"
 #include "ndn-cxx/security/transform/public-key.hpp"
@@ -85,10 +86,10 @@ ndnsec_cert_gen(int argc, char** argv)
     return 0;
   }
 
-  security::v2::AdditionalDescription additionalDescription;
+  security::AdditionalDescription additionalDescription;
 
   for (const auto& info : infos) {
-    auto pos = info.find(" ");
+    auto pos = info.find(' ');
     if (pos == std::string::npos) {
       std::cerr << "ERROR: incorrectly formatted info block [" << info << "]" << std::endl;
       return 2;
@@ -121,9 +122,9 @@ ndnsec_cert_gen(int argc, char** argv)
     }
   }
 
-  security::v2::KeyChain keyChain;
+  KeyChain keyChain;
 
-  security::v2::Certificate certRequest;
+  security::Certificate certRequest;
   try {
     certRequest = loadCertificate(requestFile);
   }
@@ -142,7 +143,7 @@ ndnsec_cert_gen(int argc, char** argv)
     .append(issuerId)
     .appendVersion();
 
-  security::v2::Certificate cert;
+  security::Certificate cert;
   cert.setName(certName);
   cert.setContent(certRequest.getContent());
   // TODO: add ability to customize
@@ -151,7 +152,7 @@ ndnsec_cert_gen(int argc, char** argv)
   SignatureInfo signatureInfo;
   signatureInfo.setValidityPeriod(security::ValidityPeriod(notBefore, notAfter));
   if (!additionalDescription.empty()) {
-    signatureInfo.appendTypeSpecificTlv(additionalDescription.wireEncode());
+    signatureInfo.addCustomTlv(additionalDescription.wireEncode());
   }
 
   security::Identity identity;
